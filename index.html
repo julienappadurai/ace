@@ -1519,9 +1519,11 @@ function startDriveAuth() {
   launchOAuthPopup(clientId);
 }
 
-// gapi + GSI auth (same method as Ledger app — works on mobile without popups)
+// ==================== GOOGLE AUTH (gapi + GSI) ====================
 let gapiOk = false;
+let gsiOk = false;
 let tokenClient = null;
+let pendingAuthClientId = null;
 
 function gapiLoaded() {
   gapi.load('client', async () => {
@@ -1529,16 +1531,34 @@ function gapiLoaded() {
       await gapi.client.init({
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
       });
-      const clientId = appData.clientId || localStorage.getItem('ace_client_id');
-      if (clientId) initTokenClient(clientId);
       gapiOk = true;
-    } catch(e) { console.error('GAPI init:', e); }
+      tryCompleteAuth();
+    } catch(e) { console.error('GAPI init error:', e); }
   });
 }
 
-function gsiLoaded() {}
+function gsiLoaded() {
+  gsiOk = true;
+  tryCompleteAuth();
+}
 
-function initTokenClient(clientId) {
+function tryCompleteAuth() {
+  // Called when either gapi or gsi finishes loading — proceed once both are ready
+  if (!gapiOk || !gsiOk) return;
+  const clientId = pendingAuthClientId || appData.clientId || localStorage.getItem('ace_client_id');
+  if (!clientId) return;
+  buildTokenClient(clientId);
+  // If auth was triggered while libraries were loading, proceed now
+  if (pendingAuthClientId) {
+    pendingAuthClientId = null;
+    doRequestToken();
+  } else {
+    // Try silent reconnect
+    silentAuth();
+  }
+}
+
+function buildTokenClient(clientId) {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: clientId,
     scope: 'https://www.googleapis.com/auth/drive.file',
@@ -1551,46 +1571,61 @@ function initTokenClient(clientId) {
   });
 }
 
-async function launchOAuthPopup(clientId) {
-  initTokenClient(clientId);
-
-  if (!gapiOk) {
-    let waited = 0;
-    while (!gapiOk && waited < 5000) {
-      await new Promise(r => setTimeout(r, 200));
-      waited += 200;
-    }
-    if (!gapiOk) { toast('Google API not ready, try again'); return; }
-  }
-
-  // Try stored token first
+function doRequestToken() {
+  if (!tokenClient) return;
   const stored = localStorage.getItem('ace_gtoken');
   if (stored) {
     try {
       gapi.client.setToken(JSON.parse(stored));
       accessToken = gapi.client.getToken().access_token;
-      await onDriveConnected();
+      onDriveConnected();
       return;
     } catch(e) { localStorage.removeItem('ace_gtoken'); }
   }
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
 
-  // Request token (shows Google account chooser inline, no popup blocked)
-  try {
-    tokenClient.requestAccessToken({ prompt: '' });
-  } catch(e) {
-    tokenClient.requestAccessToken({ prompt: 'consent' });
+async function launchOAuthPopup(clientId) {
+  // Update button to show loading state
+  const btn = document.querySelector('#screen-onboarding .btn-primary');
+  if (btn) { btn.textContent = 'Connecting…'; btn.disabled = true; }
+
+  appData.clientId = clientId;
+  localStorage.setItem('ace_client_id', clientId);
+  saveLocal();
+
+  if (!gapiOk || !gsiOk) {
+    // Libraries still loading — store clientId and proceed once ready
+    pendingAuthClientId = clientId;
+    // Reset button after 8s if still nothing happened
+    setTimeout(() => {
+      if (btn) { btn.textContent = 'Connect Google Drive'; btn.disabled = false; }
+      if (pendingAuthClientId) {
+        pendingAuthClientId = null;
+        toast('Google API failed to load. Check your connection.');
+      }
+    }, 8000);
+    return;
   }
+
+  buildTokenClient(clientId);
+  doRequestToken();
+
+  // Reset button
+  setTimeout(() => {
+    if (btn) { btn.textContent = 'Connect Google Drive'; btn.disabled = false; }
+  }, 3000);
 }
 
 function silentAuth() {
+  if (!gapiOk || !gsiOk) return;
   const stored = localStorage.getItem('ace_gtoken');
-  if (stored && gapiOk) {
-    try {
-      gapi.client.setToken(JSON.parse(stored));
-      accessToken = gapi.client.getToken().access_token;
-      onDriveConnected();
-    } catch(e) { localStorage.removeItem('ace_gtoken'); }
-  }
+  if (!stored) return;
+  try {
+    gapi.client.setToken(JSON.parse(stored));
+    accessToken = gapi.client.getToken().access_token;
+    onDriveConnected();
+  } catch(e) { localStorage.removeItem('ace_gtoken'); }
 }
 
 async function onDriveConnected() {
