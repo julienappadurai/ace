@@ -1509,44 +1509,87 @@ function startDriveAuth() {
   launchOAuthPopup(clientId);
 }
 
-function launchOAuthPopup(clientId) {
-  const redirectUri = 'https://julienappadurai.github.io/ace';
-  const scope = 'https://www.googleapis.com/auth/drive.file';
-  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scope)}&prompt=consent`;
+// gapi + GSI auth (same method as Ledger app — works on mobile without popups)
+let gapiOk = false;
+let tokenClient = null;
 
-  const popup = window.open(url, 'driveAuth', 'width=500,height=600,left=100,top=100');
-
-  const interval = setInterval(() => {
+function gapiLoaded() {
+  gapi.load('client', async () => {
     try {
-      if (!popup || popup.closed) { clearInterval(interval); return; }
-      const hash = popup.location.hash;
-      if (hash && hash.includes('access_token')) {
-        clearInterval(interval);
-        popup.close();
-        const params = new URLSearchParams(hash.substring(1));
-        accessToken = params.get('access_token');
-        onDriveConnected();
-      }
-    } catch (e) { /* cross-origin, keep polling */ }
-  }, 300);
+      await gapi.client.init({
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+      });
+      const clientId = appData.clientId || localStorage.getItem('ace_client_id');
+      if (clientId) initTokenClient(clientId);
+      gapiOk = true;
+    } catch(e) { console.error('GAPI init:', e); }
+  });
+}
+
+function gsiLoaded() {}
+
+function initTokenClient(clientId) {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    callback: async r => {
+      if (r.error) { toast('Drive auth failed: ' + r.error); return; }
+      accessToken = gapi.client.getToken().access_token;
+      localStorage.setItem('ace_gtoken', JSON.stringify(gapi.client.getToken()));
+      await onDriveConnected();
+    }
+  });
+}
+
+async function launchOAuthPopup(clientId) {
+  initTokenClient(clientId);
+
+  if (!gapiOk) {
+    let waited = 0;
+    while (!gapiOk && waited < 5000) {
+      await new Promise(r => setTimeout(r, 200));
+      waited += 200;
+    }
+    if (!gapiOk) { toast('Google API not ready, try again'); return; }
+  }
+
+  // Try stored token first
+  const stored = localStorage.getItem('ace_gtoken');
+  if (stored) {
+    try {
+      gapi.client.setToken(JSON.parse(stored));
+      accessToken = gapi.client.getToken().access_token;
+      await onDriveConnected();
+      return;
+    } catch(e) { localStorage.removeItem('ace_gtoken'); }
+  }
+
+  // Request token (shows Google account chooser inline, no popup blocked)
+  try {
+    tokenClient.requestAccessToken({ prompt: '' });
+  } catch(e) {
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  }
 }
 
 function silentAuth() {
-  // Check if there's a token in the URL hash (redirect from OAuth)
-  const hash = window.location.hash;
-  if (hash && hash.includes('access_token')) {
-    const params = new URLSearchParams(hash.substring(1));
-    accessToken = params.get('access_token');
-    history.replaceState(null, '', window.location.pathname);
-    onDriveConnected();
+  const stored = localStorage.getItem('ace_gtoken');
+  if (stored && gapiOk) {
+    try {
+      gapi.client.setToken(JSON.parse(stored));
+      accessToken = gapi.client.getToken().access_token;
+      onDriveConnected();
+    } catch(e) { localStorage.removeItem('ace_gtoken'); }
   }
 }
 
 async function onDriveConnected() {
   driveConnected = true;
+  localStorage.setItem('ace_onboarded', '1');
   toast('Connected to Google Drive ☁️');
   updateDriveSettingsUI();
   updateDriveIndicator();
+  showApp();
   await loadFromDrive();
   renderStats();
 }
@@ -1707,5 +1750,7 @@ function escHtml(str) {
 // ==================== START ====================
 init();
 </script>
+<script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
+<script src="https://accounts.google.com/gsi/client" onload="gsiLoaded()" async defer></script>
 </body>
 </html>
