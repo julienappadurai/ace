@@ -2,1788 +2,1456 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>ACE — Tennis Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ace — Tennis Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --yellow: #D4FF00;
-    --bg: #0d0d08;
-    --bg2: #141410;
-    --bg3: #1c1c16;
-    --bg4: #242420;
-    --border: #2a2a22;
-    --text: #f0f0e8;
-    --muted: #6b6b5a;
-    --danger: #ff4444;
-    --win: #D4FF00;
-    --loss: #ff4444;
-    --max-w: 430px;
+    --bg: #0a0e0a;
+    --bg2: #111611;
+    --bg3: #1a211a;
+    --bg4: #202820;
+    --border: #2a362a;
+    --border2: #344034;
+    --green: #4ade80;
+    --green2: #22c55e;
+    --green3: #16a34a;
+    --green-dim: #1a3d2a;
+    --red: #f87171;
+    --red-dim: #3d1a1a;
+    --yellow: #fbbf24;
+    --yellow-dim: #3d2e0a;
+    --text: #e8f0e8;
+    --text2: #9aaa9a;
+    --text3: #5a6a5a;
+    --card: #131a13;
+    --card2: #161e16;
+    --accent: #4ade80;
+    --radius: 12px;
+    --radius-sm: 8px;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html, body {
+  body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Instrument Sans', sans-serif;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  #app {
-    max-width: var(--max-w);
-    margin: 0 auto;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* ---- SCREENS ---- */
-  .screen {
-    display: none;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-  }
-  .screen.active { display: flex; }
-
-  .screen-scroll {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    padding: 0 16px 100px;
-  }
-  .screen-scroll::-webkit-scrollbar { display: none; }
-
-  /* ---- HEADER ---- */
-  .page-header {
-    padding: 20px 16px 12px;
-    flex-shrink: 0;
-  }
-  .page-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
-    letter-spacing: 2px;
-    color: var(--text);
-    line-height: 1;
-  }
-  .page-title span { color: var(--yellow); }
-
-  /* ---- ONBOARDING ---- */
-  #screen-onboarding {
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 24px;
-    text-align: center;
-    gap: 0;
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    max-width: var(--max-w);
-    margin: 0 auto;
-  }
-  #screen-onboarding.active { display: flex; }
-
-  .onboard-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 96px;
-    letter-spacing: 8px;
-    color: var(--text);
-    line-height: 1;
-    position: relative;
-  }
-  .onboard-logo .dot { color: var(--yellow); }
-
-  .onboard-tagline {
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-top: 8px;
-    margin-bottom: 48px;
-  }
-
-  .onboard-features {
-    list-style: none;
-    text-align: left;
-    width: 100%;
-    max-width: 280px;
-    margin-bottom: 48px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .onboard-features li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    font-family: 'DM Sans', sans-serif;
     font-size: 14px;
-    color: var(--text);
-  }
-  .onboard-features .icon {
-    width: 32px;
-    height: 32px;
-    background: var(--bg3);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
 
-  .onboard-note {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 12px;
-    line-height: 1.6;
-    max-width: 280px;
-  }
-  .onboard-note a { color: var(--yellow); text-decoration: none; }
-
-  /* ---- BOTTOM TAB BAR ---- */
-  #tab-bar {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: var(--max-w);
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    display: none;
-    justify-content: space-around;
-    align-items: center;
-    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-    z-index: 100;
-  }
-  #tab-bar.visible { display: flex; }
-
-  .tab-btn {
-    display: flex;
+  /* ── PIN SCREEN ── */
+  #pin-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
     flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 12px;
-    color: var(--muted);
-    transition: color 0.15s;
-    min-width: 56px;
+    gap: 32px;
   }
-  .tab-btn.active { color: var(--yellow); }
-  .tab-btn svg { width: 22px; height: 22px; }
-  .tab-btn span {
-    font-size: 10px;
-    font-family: 'Instrument Sans', sans-serif;
+  .pin-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    letter-spacing: 4px;
+    color: var(--green);
+    line-height: 1;
+  }
+  .pin-subtitle { color: var(--text2); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+  .pin-dots { display: flex; gap: 12px; }
+  .pin-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    background: transparent;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .pin-dot.filled { background: var(--green); border-color: var(--green); }
+  .pin-dot.error { background: var(--red); border-color: var(--red); }
+  .pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 220px; }
+  .pin-key {
+    height: 58px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
     font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .pin-key:hover { background: var(--bg4); }
+  .pin-key:active { transform: scale(0.95); background: var(--green-dim); }
+  .pin-key.del { font-size: 16px; color: var(--text2); }
+  .pin-error { color: var(--red); font-size: 12px; min-height: 18px; text-align: center; }
+
+  /* ── SETUP ── */
+  #setup-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: none; align-items: center; justify-content: center;
+    z-index: 999;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px;
+  }
+  .setup-title { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--green); letter-spacing: 3px; }
+  .setup-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 16px; }
+  .setup-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text2); margin-bottom: 4px; }
+  .setup-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .setup-input:focus { border-color: var(--green); }
+  .btn-primary {
+    background: var(--green);
+    color: #0a0e0a;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
     letter-spacing: 0.5px;
   }
+  .btn-primary:hover { background: var(--green2); }
+  .btn-primary:active { transform: scale(0.98); }
 
-  /* ---- BUTTONS ---- */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 14px 20px;
-    border-radius: 12px;
-    border: none;
+  /* ── MAIN APP ── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    height: 60px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--green);
+  }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .sync-indicator { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); }
+  .sync-dot.synced { background: var(--green); }
+  .sync-dot.syncing { background: var(--yellow); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── NAV ── */
+  .nav {
+    display: flex; gap: 4px;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .nav-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 16px;
     cursor: pointer;
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    transition: opacity 0.15s, transform 0.1s;
-    width: 100%;
+    white-space: nowrap;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
   }
-  .btn:active { transform: scale(0.97); opacity: 0.85; }
-  .btn-primary { background: var(--yellow); color: #0d0d08; }
-  .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
-  .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
-  .btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 8px; width: auto; }
-  .btn-icon {
-    width: 36px; height: 36px; padding: 0; border-radius: 10px;
-    background: var(--bg3); border: 1px solid var(--border);
-    color: var(--text); cursor: pointer; display: flex; align-items: center;
-    justify-content: center; transition: opacity 0.15s;
-  }
-  .btn-icon:active { opacity: 0.7; }
+  .nav-btn:hover { color: var(--text); background: var(--bg3); }
+  .nav-btn.active { color: var(--green); background: var(--green-dim); border-color: var(--border2); }
 
-  /* ---- CARDS ---- */
+  /* ── CONTENT ── */
+  .content { padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; flex: 1; }
+
+  /* ── TABS ── */
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  /* ── CARDS ── */
   .card {
-    background: var(--bg2);
+    background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text3);
     margin-bottom: 12px;
   }
 
-  .match-card {
-    background: var(--bg2);
+  /* ── STAT GRID ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: border-color 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 6px;
   }
-  .match-card:active { border-color: var(--yellow); }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: var(--text); line-height: 1; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-sub { font-size: 12px; color: var(--text2); }
 
-  .result-badge {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .result-badge.W { background: rgba(212,255,0,0.15); color: var(--win); }
-  .result-badge.L { background: rgba(255,68,68,0.12); color: var(--loss); }
+  /* ── CHART ── */
+  .chart-wrap { width: 100%; overflow-x: auto; margin-bottom: 24px; }
+  canvas { display: block; }
 
-  .match-info { flex: 1; min-width: 0; }
-  .match-opponent {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .match-meta {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-  .match-sets {
-    font-size: 12px;
-    color: var(--muted);
-    text-align: right;
-    flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* ---- STAT GRID ---- */
-  .stat-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .stat-box {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    text-align: center;
-  }
-  .stat-box.wide { grid-column: span 2; }
-  .stat-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 48px;
-    line-height: 1;
-    color: var(--yellow);
-  }
-  .stat-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-top: 4px;
-  }
-
-  .winrate-bar {
-    height: 6px;
-    background: var(--bg4);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 10px;
-  }
-  .winrate-fill {
-    height: 100%;
-    background: var(--yellow);
-    border-radius: 3px;
-    transition: width 0.5s ease;
-  }
-
-  /* ---- FORMS ---- */
-  .form-group { margin-bottom: 16px; }
-  .form-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 8px;
-    display: block;
-  }
-  .form-input {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    color: var(--text);
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.15s;
-    -webkit-appearance: none;
-  }
-  .form-input:focus { border-color: var(--yellow); }
-  .form-input::placeholder { color: var(--muted); }
-
-  textarea.form-input {
-    resize: none;
-    min-height: 80px;
-  }
-
-  select.form-input {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b5a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
-    cursor: pointer;
-  }
-
-  /* ---- SET ROWS ---- */
-  .sets-container { display: flex; flex-direction: column; gap: 8px; }
-  .set-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-  }
-  .set-label { font-size: 12px; color: var(--muted); min-width: 44px; }
-  .set-score-input {
-    width: 52px;
-    background: var(--bg4);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 8px;
-    color: var(--text);
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 16px;
-    text-align: center;
-    outline: none;
-  }
-  .set-score-input:focus { border-color: var(--yellow); }
-  .set-divider { color: var(--muted); font-size: 18px; }
-  .set-remove {
-    margin-left: auto;
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 18px;
-    padding: 0 4px;
-    line-height: 1;
-  }
-  .vs-label { font-size: 11px; color: var(--muted); text-align: center; }
-
-  /* ---- MATCH DETAIL ---- */
-  #screen-detail { display: none; flex-direction: column; }
-  #screen-detail.active { display: flex; }
-
-  .detail-header {
-    padding: 20px 16px 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
-  }
-  .detail-result-big {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 64px;
-    line-height: 1;
-  }
-  .detail-result-big.W { color: var(--win); }
-  .detail-result-big.L { color: var(--loss); }
-  .detail-opponent {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 1px;
-    line-height: 1;
-  }
-  .detail-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-  .set-detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .set-detail-row:last-child { border-bottom: none; }
-  .set-detail-label { font-size: 13px; color: var(--muted); }
-  .set-score-display {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
-  }
-  .set-score-display.set-win { color: var(--yellow); }
-  .set-score-display.set-loss { color: var(--loss); }
-
-  /* ---- RIVALS ---- */
-  .rival-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .rival-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: var(--bg3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    color: var(--yellow);
-    flex-shrink: 0;
-  }
-  .rival-name { font-size: 15px; font-weight: 600; }
-  .rival-record { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .rival-wl {
-    margin-left: auto;
-    text-align: right;
-    flex-shrink: 0;
-  }
-  .rival-wl-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    line-height: 1;
-  }
-  .rival-wl-num .w { color: var(--win); }
-  .rival-wl-num .sep { color: var(--muted); margin: 0 2px; }
-  .rival-wl-num .l { color: var(--loss); }
-  .rival-wl-label { font-size: 10px; color: var(--muted); text-align: right; }
-
-  /* ---- AI COACH ---- */
-  #screen-coach { display: none; flex-direction: column; }
-  #screen-coach.active { display: flex; }
-
-  #coach-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px 16px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  #coach-messages::-webkit-scrollbar { display: none; }
-
-  .msg {
-    max-width: 85%;
-    padding: 12px 14px;
-    border-radius: 16px;
-    font-size: 14px;
-    line-height: 1.55;
-  }
-  .msg-user {
-    background: var(--yellow);
-    color: #0d0d08;
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
-    font-weight: 500;
-  }
-  .msg-ai {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    align-self: flex-start;
-    border-bottom-left-radius: 4px;
-  }
-  .msg-ai.typing { color: var(--muted); font-style: italic; }
-
-  .coach-input-bar {
-    padding: 12px 16px max(16px, env(safe-area-inset-bottom));
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 8px;
-    background: var(--bg);
-    flex-shrink: 0;
-  }
-  .coach-input-bar .form-input {
-    flex: 1;
-    margin: 0;
-    padding: 10px 14px;
-  }
-  .coach-send {
-    width: 44px;
-    height: 44px;
-    background: var(--yellow);
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: opacity 0.15s;
-  }
-  .coach-send:active { opacity: 0.7; }
-  .coach-send svg { width: 18px; height: 18px; }
-
-  .coach-locked {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 32px;
-    text-align: center;
-    gap: 12px;
-    color: var(--muted);
-    font-size: 14px;
-  }
-  .coach-locked-icon { font-size: 48px; opacity: 0.4; }
-
-  /* ---- SETTINGS ---- */
-  .settings-section-title {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 24px 0 10px;
-  }
-
-  .settings-row {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+  /* ── MATCH LIST ── */
+  .match-item {
+    display: flex; align-items: center; gap: 16px;
     padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: border-color 0.15s;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: default;
   }
-  .settings-row:active { border-color: var(--yellow); }
-  .settings-row-label { font-size: 14px; font-weight: 500; }
-  .settings-row-value { font-size: 12px; color: var(--muted); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .match-item:last-child { border-bottom: none; }
+  .match-item:hover { background: var(--bg3); }
+  .match-result-badge {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px; flex-shrink: 0;
+  }
+  .match-result-badge.win { background: var(--green-dim); color: var(--green); }
+  .match-result-badge.loss { background: var(--red-dim); color: var(--red); }
+  .match-info { flex: 1; min-width: 0; }
+  .match-opponent { font-weight: 600; font-size: 14px; }
+  .match-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .match-score { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text2); text-align: right; }
+  .match-score .set { display: inline-block; margin-left: 6px; }
+  .match-score .set.won { color: var(--green); }
+  .match-score .set.lost { color: var(--red); }
 
-  .drive-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-bottom: 8px;
-  }
-  .drive-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--muted);
-    flex-shrink: 0;
-    transition: background 0.3s;
-  }
-  .drive-dot.connected { background: var(--yellow); }
-  .drive-dot.syncing { animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .drive-status-text { font-size: 13px; color: var(--text); }
-  .drive-status-sub { font-size: 11px; color: var(--muted); }
-
-  /* ---- MODALS / SHEET ---- */
-  .sheet-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .sheet-overlay.open { display: flex; }
-
-  .sheet {
-    background: var(--bg2);
-    border-radius: 24px 24px 0 0;
-    border: 1px solid var(--border);
-    border-bottom: none;
-    width: 100%;
-    max-width: var(--max-w);
-    padding: 16px;
-    padding-bottom: max(24px, env(safe-area-inset-bottom));
-    max-height: 92dvh;
-    overflow-y: auto;
-    animation: slideUp 0.25s ease;
-  }
-  .sheet::-webkit-scrollbar { display: none; }
-  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-
-  .sheet-handle {
-    width: 36px;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    margin: 0 auto 20px;
-  }
-  .sheet-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
-  }
-
-  /* ---- EMPTY STATES ---- */
-  .empty-state {
-    text-align: center;
-    padding: 60px 24px;
-    color: var(--muted);
-  }
-  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
-  .empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .empty-sub { font-size: 13px; line-height: 1.5; }
-
-  /* ---- LOG FAB ---- */
-  .fab {
-    position: fixed;
-    bottom: 76px;
-    right: calc(50% - var(--max-w)/2 + 16px);
-    width: 52px;
-    height: 52px;
-    background: var(--yellow);
-    border-radius: 16px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 50;
-    border: none;
-    transition: transform 0.15s;
-    box-shadow: 0 4px 20px rgba(212,255,0,0.3);
-  }
-  .fab.visible { display: flex; }
-  .fab:active { transform: scale(0.93); }
-  .fab svg { width: 22px; height: 22px; color: #0d0d08; }
-
-  /* ---- TOAST ---- */
-  #toast {
-    position: fixed;
-    bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
+  /* ── FORMS ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  .form-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); }
+  .form-input, .form-select {
     background: var(--bg3);
     border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     color: var(--text);
-    padding: 10px 18px;
-    border-radius: 100px;
-    font-size: 13px;
-    z-index: 300;
-    opacity: 0;
-    transition: all 0.25s;
-    pointer-events: none;
-    white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
   }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .form-input:focus, .form-select:focus { border-color: var(--green); }
+  .form-select option { background: var(--bg3); }
 
-  /* ---- SECTION LABELS ---- */
-  .section-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 20px 0 10px;
-  }
-
-  /* ---- MISC ---- */
-  .divider { height: 1px; background: var(--border); margin: 16px 0; }
-  .text-muted { color: var(--muted); font-size: 13px; }
-  .text-yellow { color: var(--yellow); }
-  .mt-8 { margin-top: 8px; }
-  .mt-16 { margin-top: 16px; }
-  .flex { display: flex; }
-  .items-center { align-items: center; }
-  .gap-8 { gap: 8px; }
-  .justify-between { justify-content: space-between; }
-
-  /* streaks */
-  .streak-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+  /* ── SETS BUILDER ── */
+  .sets-builder { display: flex; flex-direction: column; gap: 10px; }
+  .set-row { display: flex; align-items: center; gap: 10px; }
+  .set-row-label { font-size: 12px; color: var(--text2); width: 40px; flex-shrink: 0; }
+  .set-score-input {
+    width: 56px;
     background: var(--bg3);
     border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 4px 10px;
-    font-size: 12px;
-    color: var(--muted);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    padding: 8px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
   }
-  .streak-chip.hot { border-color: rgba(212,255,0,0.4); color: var(--yellow); }
-  .streak-chip.cold { border-color: rgba(255,68,68,0.3); color: var(--loss); }
+  .set-score-input:focus { border-color: var(--green); }
+  .set-vs { color: var(--text3); font-size: 12px; }
+  .btn-add-set, .btn-rm-set {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text2);
+    font-size: 18px;
+    width: 32px; height: 32px;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-add-set:hover { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+  .btn-rm-set:hover { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+
+  /* ── BUTTONS ── */
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
+  .btn-danger {
+    background: none;
+    border: 1px solid var(--red-dim);
+    border-radius: var(--radius-sm);
+    color: var(--red);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-danger:hover { background: var(--red-dim); }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--text); }
+
+  /* ── OPPONENT TABLE ── */
+  .opp-table { width: 100%; border-collapse: collapse; }
+  .opp-table th {
+    text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+    color: var(--text3); padding: 8px 12px; border-bottom: 1px solid var(--border);
+  }
+  .opp-table td { padding: 12px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .opp-table tr:last-child td { border-bottom: none; }
+  .opp-table tr:hover td { background: var(--bg3); }
+  .win-rate-bar { height: 4px; background: var(--bg3); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .win-rate-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.5s; }
+
+  /* ── COACH TAB ── */
+  .coach-layout { display: flex; flex-direction: column; height: calc(100vh - 200px); min-height: 400px; }
+  .coach-messages {
+    flex: 1; overflow-y: auto; padding: 16px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .msg { display: flex; gap: 12px; max-width: 85%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+  .msg.ace .msg-avatar { background: var(--green-dim); color: var(--green); }
+  .msg.user .msg-avatar { background: var(--bg4); color: var(--text2); }
+  .msg-bubble {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 16px;
+    font-size: 14px; line-height: 1.6; color: var(--text);
+  }
+  .msg.ace .msg-bubble { border-color: var(--border2); }
+  .msg.user .msg-bubble { background: var(--green-dim); border-color: var(--green3); }
+  .msg-time { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .coach-input-area {
+    background: var(--bg3); border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 12px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .coach-input-row { display: flex; gap: 8px; align-items: flex-end; }
+  .coach-textarea {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    resize: none;
+    min-height: 42px; max-height: 120px;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+  .coach-textarea:focus { border-color: var(--green); }
+  .coach-send {
+    background: var(--green);
+    border: none; border-radius: var(--radius-sm);
+    color: #0a0e0a; font-size: 18px;
+    width: 42px; height: 42px; flex-shrink: 0;
+    cursor: pointer; transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .coach-send:hover { background: var(--green2); }
+  .coach-send:disabled { background: var(--bg4); color: var(--text3); cursor: not-allowed; }
+  .clip-upload-row { display: flex; align-items: center; gap: 8px; }
+  .clip-label {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg4); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 6px 12px;
+    cursor: pointer; font-size: 12px; color: var(--text2);
+    transition: all 0.15s;
+  }
+  .clip-label:hover { border-color: var(--green); color: var(--green); }
+  #clip-input { display: none; }
+  .clip-name { font-size: 12px; color: var(--green); }
+  .typing-indicator { display: flex; gap: 4px; padding: 8px 0; }
+  .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: typing 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center;
+    z-index: 500; padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: var(--radius); padding: 28px;
+    width: 100%; max-width: 480px;
+    max-height: 90vh; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--text3); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px);
+    background: var(--bg4); border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); padding: 10px 20px;
+    font-size: 13px; color: var(--text);
+    transition: transform 0.3s ease;
+    z-index: 9999; white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── RECENT MATCHES (dashboard) ── */
+  .recent-list { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  /* ── SURFACE BADGE ── */
+  .surface-badge {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+    padding: 2px 7px; border-radius: 20px; font-weight: 600;
+  }
+  .surface-badge.hard { background: #1a2a3d; color: #60a5fa; }
+  .surface-badge.clay { background: #3d2010; color: #fb923c; }
+  .surface-badge.grass { background: var(--green-dim); color: var(--green); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .content { padding: 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .header { padding: 0 16px; }
+    .nav { padding: 10px 16px; }
+  }
 </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- ONBOARDING -->
-  <div id="screen-onboarding" class="screen">
-    <div class="onboard-logo">ACE<span class="dot">●</span></div>
-    <div class="onboard-tagline">Your personal tennis tracker</div>
-    <ul class="onboard-features">
-      <li><div class="icon">📊</div> Track every match & set score</li>
-      <li><div class="icon">⚔️</div> Head-to-head rival records</li>
-      <li><div class="icon">🤖</div> AI coach powered by Claude</li>
-      <li><div class="icon">☁️</div> Synced to your Google Drive</li>
-    </ul>
-    <button class="btn btn-primary" onclick="startDriveAuth()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 2L2 19h20L12 2z"/><path d="M12 2l10 17H2"/></svg>
-      Connect Google Drive
-    </button>
-    <button class="btn btn-secondary mt-8" onclick="continueOffline()">Continue offline</button>
-    <p class="onboard-note">
-      Drive sync requires a Google Cloud OAuth Client ID.<br>
-      <a href="#" onclick="showClientIdInfo()">How to get one →</a>
-    </p>
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div class="pin-logo">ACE</div>
+  <div class="pin-subtitle">Tennis Tracker</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
   </div>
-
-  <!-- CLIENT ID SETUP SHEET -->
-  <div class="sheet-overlay" id="sheet-clientid">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title">Google Drive Setup</div>
-      <p class="text-muted" style="margin-bottom:16px;line-height:1.6">
-        To sync with Drive, you need a free Google Cloud OAuth Client ID. Create one at
-        <strong style="color:var(--text)">console.cloud.google.com</strong> under
-        APIs &amp; Services → Credentials → OAuth 2.0 Client ID (Web Application).
-        Add your GitHub Pages URL as an authorised origin.
-      </p>
-      <div class="form-group">
-        <label class="form-label">OAuth Client ID</label>
-        <input class="form-input" id="input-client-id" placeholder="xxxx.apps.googleusercontent.com" type="text">
-      </div>
-      <button class="btn btn-primary" onclick="saveClientIdAndAuth()">Save &amp; Connect</button>
-      <button class="btn btn-secondary mt-8" onclick="closeSheet('sheet-clientid')">Cancel</button>
-    </div>
+  <div class="pin-keypad" id="pin-keypad">
+    <button class="pin-key" data-k="1">1</button>
+    <button class="pin-key" data-k="2">2</button>
+    <button class="pin-key" data-k="3">3</button>
+    <button class="pin-key" data-k="4">4</button>
+    <button class="pin-key" data-k="5">5</button>
+    <button class="pin-key" data-k="6">6</button>
+    <button class="pin-key" data-k="7">7</button>
+    <button class="pin-key" data-k="8">8</button>
+    <button class="pin-key" data-k="9">9</button>
+    <button class="pin-key del" data-k="del">⌫</button>
+    <button class="pin-key" data-k="0">0</button>
+    <button class="pin-key del" data-k="clr">✕</button>
   </div>
-
-  <!-- ===== MAIN APP SCREENS ===== -->
-
-  <!-- STATS -->
-  <div id="screen-stats" class="screen">
-    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
-      <div class="page-title">ACE<span style="color:var(--yellow)">●</span></div>
-      <div id="drive-indicator" class="streak-chip" onclick="navigate('settings')"></div>
-    </div>
-    <div class="screen-scroll" id="stats-scroll">
-      <!-- content injected by renderStats() -->
-    </div>
-  </div>
-
-  <!-- LOG MATCH SHEET (triggered by FAB) -->
-  <div class="sheet-overlay" id="sheet-log">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title">Log Match</div>
-
-      <div class="form-group">
-        <label class="form-label">Opponent</label>
-        <input class="form-input" id="log-opponent" placeholder="Name" type="text">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Date</label>
-        <input class="form-input" id="log-date" type="date">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Location</label>
-        <select class="form-input" id="log-location-select" onchange="handleLocationSelect(this)">
-          <option value="">Select or add new…</option>
-        </select>
-        <input class="form-input mt-8" id="log-location-text" placeholder="Or type new venue" type="text" style="display:none">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">
-          Sets
-          <span style="color:var(--muted);font-size:10px;margin-left:4px;text-transform:none;letter-spacing:0">— You / Opponent</span>
-        </label>
-        <div class="sets-container" id="log-sets"></div>
-        <button class="btn btn-secondary mt-8" onclick="addSetRow()" style="height:40px;font-size:13px">+ Add Set</button>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Notes</label>
-        <textarea class="form-input" id="log-notes" placeholder="How did it go?"></textarea>
-      </div>
-
-      <button class="btn btn-primary" onclick="saveMatch()">Save Match</button>
-      <button class="btn btn-secondary mt-8" onclick="closeSheet('sheet-log')">Cancel</button>
-    </div>
-  </div>
-
-  <!-- RIVALS -->
-  <div id="screen-rivals" class="screen">
-    <div class="page-header">
-      <div class="page-title">Rivals</div>
-    </div>
-    <div class="screen-scroll" id="rivals-scroll"></div>
-  </div>
-
-  <!-- AI COACH -->
-  <div id="screen-coach" class="screen">
-    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
-      <div class="page-title">Coach</div>
-      <button class="btn-icon" onclick="clearCoachChat()" title="Clear chat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-      </button>
-    </div>
-    <div id="coach-messages"></div>
-    <div class="coach-input-bar" id="coach-input-bar">
-      <input class="form-input" id="coach-input" placeholder="Ask your coach…" type="text" onkeydown="if(event.key==='Enter')sendCoachMessage()">
-      <button class="coach-send" onclick="sendCoachMessage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#0d0d08" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- SETTINGS -->
-  <div id="screen-settings" class="screen">
-    <div class="page-header">
-      <div class="page-title">Settings</div>
-    </div>
-    <div class="screen-scroll">
-      <div class="settings-section-title">Google Drive</div>
-      <div class="drive-status" id="settings-drive-status">
-        <div class="drive-dot" id="settings-drive-dot"></div>
-        <div>
-          <div class="drive-status-text" id="settings-drive-text">Not connected</div>
-          <div class="drive-status-sub" id="settings-drive-sub">Data stored locally only</div>
-        </div>
-      </div>
-      <button class="btn btn-secondary" id="btn-drive-connect" onclick="startDriveAuth()" style="margin-bottom:8px">Connect Google Drive</button>
-      <button class="btn btn-secondary" id="btn-drive-sync" onclick="syncNow()" style="display:none;margin-bottom:8px">Sync Now</button>
-      <button class="btn btn-secondary" id="btn-drive-disconnect" onclick="disconnectDrive()" style="display:none;margin-bottom:8px">Disconnect</button>
-
-      <div class="settings-section-title">OAuth Client ID</div>
-      <div class="form-group">
-        <input class="form-input" id="settings-client-id" placeholder="xxxx.apps.googleusercontent.com" type="text">
-      </div>
-      <button class="btn btn-secondary" onclick="saveClientId()" style="margin-bottom:8px">Save Client ID</button>
-
-      <div class="settings-section-title">Data</div>
-      <button class="btn btn-secondary" onclick="exportData()" style="margin-bottom:8px">Export JSON</button>
-      <button class="btn btn-danger" onclick="confirmClearData()" style="margin-bottom:8px">Clear All Data</button>
-    </div>
-  </div>
-
-  <!-- MATCH DETAIL -->
-  <div id="screen-detail" class="screen">
-    <div class="detail-header">
-      <button class="btn-icon" onclick="closeDetail()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      </button>
-      <div>
-        <div class="detail-result-big" id="detail-result">W</div>
-      </div>
-      <div>
-        <div class="detail-opponent" id="detail-opponent"></div>
-        <div class="detail-date" id="detail-date"></div>
-      </div>
-    </div>
-    <div class="screen-scroll" id="detail-scroll"></div>
-  </div>
-
-  <!-- TAB BAR -->
-  <nav id="tab-bar">
-    <button class="tab-btn" data-tab="stats" onclick="navigate('stats')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Stats</span>
-    </button>
-    <button class="tab-btn" data-tab="rivals" onclick="navigate('rivals')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span>Rivals</span>
-    </button>
-    <button class="tab-btn" data-tab="coach" onclick="navigate('coach')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span>Coach</span>
-    </button>
-    <button class="tab-btn" data-tab="settings" onclick="navigate('settings')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span>Settings</span>
-    </button>
-  </nav>
-
-  <!-- FAB -->
-  <button class="fab" id="fab" onclick="openLogSheet()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </button>
-
-  <!-- TOAST -->
-  <div id="toast"></div>
-
+  <div class="pin-error" id="pin-error"></div>
 </div>
 
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+  <div class="setup-title">ACE</div>
+  <p style="color:var(--text2);font-size:13px;">Let's set up your tracker</p>
+  <div class="setup-card">
+    <div>
+      <div class="setup-label">Your name</div>
+      <input class="setup-input" id="setup-name" placeholder="e.g. Julien" maxlength="30">
+    </div>
+    <div>
+      <div class="setup-label">Set a 4-digit PIN</div>
+      <input class="setup-input" id="setup-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+    </div>
+    <button class="btn-primary" onclick="completeSetup()">Get Started →</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <header class="header">
+    <div class="header-logo">ACE</div>
+    <div class="header-right">
+      <div class="sync-indicator">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">Offline</span>
+      </div>
+      <button class="btn-ghost" id="gauth-btn" onclick="handleGoogleAuth()" style="font-size:12px;padding:6px 12px;">Connect Drive</button>
+    </div>
+  </header>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="switchTab('matches')">Matches</button>
+    <button class="nav-btn" onclick="switchTab('opponents')">Opponents</button>
+    <button class="nav-btn" onclick="switchTab('coach')">🎾 Ace Coach</button>
+  </nav>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="tab active" id="tab-dashboard">
+      <div class="stat-grid" id="dash-stats"></div>
+      <div class="chart-wrap card" style="margin-bottom:24px;padding:20px;">
+        <div class="card-title">Last 12 months — matches & win rate</div>
+        <canvas id="main-chart" height="160"></canvas>
+      </div>
+      <div class="section-header">
+        <div class="section-title">Recent Matches</div>
+      </div>
+      <div class="recent-list" id="recent-list"></div>
+    </div>
+
+    <!-- MATCHES -->
+    <div class="tab" id="tab-matches">
+      <div class="section-header">
+        <div class="section-title">All Matches</div>
+        <button class="btn-primary" onclick="openAddMatch()">+ Log Match</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div id="match-list"></div>
+      </div>
+    </div>
+
+    <!-- OPPONENTS -->
+    <div class="tab" id="tab-opponents">
+      <div class="section-header">
+        <div class="section-title">Opponents</div>
+        <button class="btn-primary" onclick="openAddOpponent()">+ Add Opponent</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table class="opp-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Matches</th>
+              <th>W / L</th>
+              <th>Win %</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="opp-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COACH -->
+    <div class="tab" id="tab-coach">
+      <div class="coach-layout">
+        <div class="coach-messages" id="coach-messages"></div>
+        <div class="coach-input-area">
+          <div class="clip-upload-row">
+            <label class="clip-label" for="clip-input">
+              📎 Attach clip
+            </label>
+            <input type="file" id="clip-input" accept="video/*" onchange="handleClipSelected(this)">
+            <span class="clip-name" id="clip-name"></span>
+            <button class="btn-ghost" id="clip-clear" style="display:none;font-size:11px;padding:4px 8px;" onclick="clearClip()">✕ Clear</button>
+          </div>
+          <div class="coach-input-row">
+            <textarea class="coach-textarea" id="coach-input" placeholder="Ask Ace anything about your game..." rows="1"
+              onkeydown="coachKeydown(event)" oninput="autoResize(this)"></textarea>
+            <button class="coach-send" id="coach-send-btn" onclick="sendCoachMessage()">↑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD MATCH MODAL -->
+<div class="modal-overlay" id="modal-match">
+  <div class="modal">
+    <div class="modal-title" id="match-modal-title">Log Match</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-input" type="date" id="m-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Opponent</label>
+        <select class="form-select" id="m-opponent">
+          <option value="">Select opponent</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Surface</label>
+        <select class="form-select" id="m-surface">
+          <option value="hard">Hard</option>
+          <option value="clay">Clay</option>
+          <option value="grass">Grass</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <input class="form-input" type="text" id="m-location" placeholder="e.g. Central Park">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Score (Best of 3)</label>
+        <div class="sets-builder" id="sets-builder"></div>
+        <button class="btn-ghost" style="margin-top:8px;width:fit-content;font-size:12px;" onclick="addSetRow()">+ Add Set</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-match')">Cancel</button>
+      <button class="btn-primary" onclick="saveMatch()">Save Match</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD OPPONENT MODAL -->
+<div class="modal-overlay" id="modal-opponent">
+  <div class="modal">
+    <div class="modal-title">Add Opponent</div>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input class="form-input" type="text" id="opp-name-input" placeholder="Opponent name">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-opponent')">Cancel</button>
+      <button class="btn-primary" onclick="saveOpponent()">Add</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Google APIs -->
+<script src="https://accounts.google.com/gsi/client" async></script>
 <script>
-// ==================== STATE ====================
-let appData = { matches: [], venues: [], apiKey: '', clientId: '', version: 1 };
-let driveConnected = false;
-let driveFileId = null;
-let accessToken = null;
-let currentTab = 'stats';
-let previousTab = 'stats';
-let coachHistory = [];
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const CLIENT_ID = '259135370683-2kh47mi72o35829gd5e82fqo8hnan56a.apps.googleusercontent.com';
+const API_KEY   = 'AIzaSyB9FjDiIuLwRgQm6bus-VbbWybvjWb4RnM';
+const SCOPES    = 'https://www.googleapis.com/auth/drive.file';
+const FILE_NAME = 'tennis-data.json';
+const FOLDER    = 'Tennis Tracker';
+const ANTHROPIC_KEY_STORE = 'ace_anthropic_key';
 
-// ==================== INIT ====================
-function init() {
-  loadLocal();
-  const clientId = localStorage.getItem('ace_client_id') || appData.clientId;
-  if (clientId) {
-    document.getElementById('settings-client-id').value = clientId;
-    appData.clientId = clientId;
-  }
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+let D = {
+  matches: [],
+  opponents: [],
+  coach: { messages: [] },
+  settings: { name: '', pin: '' }
+};
 
-  const hasStoredToken = !!localStorage.getItem('ace_gtoken');
-  if (hasStoredToken) {
-    showApp();
-    silentAuth();
-  } else {
-    showOnboarding();
-  }
+let gapiReady = false, tokenClient = null, driveFileId = null, isSignedIn = false;
+let editMatchId = null;
+let pendingClipFile = null;
+let pendingClipBase64 = null;
 
-  // set default date
-  document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
-}
-
-// ==================== LOCAL STORAGE ====================
+// ═══════════════════════════════════════════════
+// LOCAL STORAGE
+// ═══════════════════════════════════════════════
+function saveLocal() { localStorage.setItem('ace_data', JSON.stringify(D)); }
 function loadLocal() {
-  const raw = localStorage.getItem('ace_data');
-  if (raw) {
-    try { appData = { ...appData, ...JSON.parse(raw) }; } catch(e) {}
+  const s = localStorage.getItem('ace_data');
+  if (s) { try { D = JSON.parse(s); } catch(e){} }
+}
+
+// ═══════════════════════════════════════════════
+// PIN
+// ═══════════════════════════════════════════════
+let pinBuffer = '';
+function updatePinDots(err) {
+  for (let i=0;i<4;i++) {
+    const d = document.getElementById('d'+i);
+    d.className = 'pin-dot';
+    if (err) d.classList.add('error');
+    else if (i < pinBuffer.length) d.classList.add('filled');
+  }
+}
+document.getElementById('pin-keypad').addEventListener('click', e => {
+  const btn = e.target.closest('.pin-key');
+  if (!btn) return;
+  const k = btn.dataset.k;
+  if (k === 'del') { pinBuffer = pinBuffer.slice(0,-1); }
+  else if (k === 'clr') { pinBuffer = ''; }
+  else if (pinBuffer.length < 4) { pinBuffer += k; }
+  updatePinDots(false);
+  document.getElementById('pin-error').textContent = '';
+  if (pinBuffer.length === 4) setTimeout(checkPin, 100);
+});
+function checkPin() {
+  loadLocal();
+  if (!D.settings.pin) {
+    // No pin set yet — go to setup
+    document.getElementById('pin-screen').style.display = 'none';
+    const ss = document.getElementById('setup-screen');
+    ss.style.display = 'flex';
+    return;
+  }
+  if (pinBuffer === D.settings.pin) {
+    document.getElementById('pin-screen').style.display = 'none';
+    launchApp();
+  } else {
+    updatePinDots(true);
+    document.getElementById('pin-error').textContent = 'Incorrect PIN';
+    pinBuffer = '';
+    setTimeout(() => updatePinDots(false), 600);
   }
 }
 
-function saveLocal() {
-  localStorage.setItem('ace_data', JSON.stringify(appData));
+// ═══════════════════════════════════════════════
+// SETUP
+// ═══════════════════════════════════════════════
+function completeSetup() {
+  const name = document.getElementById('setup-name').value.trim();
+  const pin  = document.getElementById('setup-pin').value.trim();
+  if (!name) { showToast('Please enter your name'); return; }
+  if (!/^\d{4}$/.test(pin)) { showToast('PIN must be 4 digits'); return; }
+  D.settings.name = name;
+  D.settings.pin  = pin;
+  saveLocal();
+  document.getElementById('setup-screen').style.display = 'none';
+  launchApp();
 }
 
-// ==================== NAVIGATION ====================
-function showOnboarding() {
-  // Hide all app screens
-  ['stats','rivals','coach','settings','detail'].forEach(t => {
-    document.getElementById('screen-' + t).classList.remove('active');
+// ═══════════════════════════════════════════════
+// LAUNCH
+// ═══════════════════════════════════════════════
+function launchApp() {
+  document.getElementById('app').style.display = 'flex';
+  loadGoogleApis();
+  renderAll();
+  initCoachChat();
+}
+
+// ═══════════════════════════════════════════════
+// GOOGLE DRIVE
+// ═══════════════════════════════════════════════
+function loadGoogleApis() {
+  const s = document.createElement('script');
+  s.src = 'https://apis.google.com/js/api.js';
+  s.onload = () => gapi.load('client', initGapiClient);
+  document.head.appendChild(s);
+}
+async function initGapiClient() {
+  await gapi.client.init({ apiKey: API_KEY, discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+  gapiReady = true;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID, scope: SCOPES,
+    callback: async (resp) => {
+      if (resp.error) return;
+      isSignedIn = true;
+      document.getElementById('gauth-btn').textContent = 'Drive ✓';
+      document.getElementById('gauth-btn').style.color = 'var(--green)';
+      setSyncStatus('syncing', 'Syncing…');
+      await syncDrive();
+      setSyncStatus('synced', 'Synced');
+    }
   });
-  document.getElementById('tab-bar').classList.remove('visible');
-  document.getElementById('fab').classList.remove('visible');
-  document.getElementById('screen-onboarding').classList.add('active');
 }
-
-function showApp() {
-  document.getElementById('screen-onboarding').classList.remove('active');
-  navigate('stats');
+function handleGoogleAuth() {
+  if (!gapiReady) { showToast('Google APIs loading, try again'); return; }
+  tokenClient.requestAccessToken({ prompt: isSignedIn ? '' : 'consent' });
 }
-
-function continueOffline() {
-  showApp();
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('sync-dot');
+  dot.className = 'sync-dot ' + state;
+  document.getElementById('sync-label').textContent = label;
 }
-
-function navigate(tab) {
-  // hide detail if showing
-  document.getElementById('screen-detail').classList.remove('active');
-
-  // hide all screens
-  ['stats','rivals','coach','settings'].forEach(t => {
-    document.getElementById('screen-' + t).classList.remove('active');
+async function syncDrive() {
+  try {
+    // Find or create folder
+    let folderId = await findOrCreateFolder(FOLDER);
+    // Find file
+    const res = await gapi.client.drive.files.list({
+      q: `name='${FILE_NAME}' and '${folderId}' in parents and trashed=false`,
+      fields: 'files(id,modifiedTime)'
+    });
+    if (res.result.files.length > 0) {
+      driveFileId = res.result.files[0].id;
+      // Download and merge
+      const dl = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,
+        { headers: { Authorization: `Bearer ${gapi.auth.getToken().access_token}` } });
+      const remote = await dl.json();
+      // Simple merge: remote wins if newer
+      D = remote;
+      D.settings = D.settings || { name: D.settings?.name || '', pin: D.settings?.pin || '' };
+      D.matches = D.matches || [];
+      D.opponents = D.opponents || [];
+      D.coach = D.coach || { messages: [] };
+      saveLocal();
+      renderAll();
+      initCoachChat();
+    } else {
+      // Upload new file
+      driveFileId = await uploadDrive(folderId);
+    }
+    setSyncStatus('synced', 'Synced');
+  } catch(e) {
+    console.error(e);
+    setSyncStatus('', 'Sync failed');
+  }
+}
+async function findOrCreateFolder(name) {
+  const res = await gapi.client.drive.files.list({
+    q: `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id)'
   });
-
-  // update tabs
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.tab === tab);
+  if (res.result.files.length > 0) return res.result.files[0].id;
+  const cr = await gapi.client.drive.files.create({
+    resource: { name, mimeType: 'application/vnd.google-apps.folder' },
+    fields: 'id'
   });
-
-  document.getElementById('screen-' + tab).classList.add('active');
-  document.getElementById('tab-bar').classList.add('visible');
-
-  const showFab = (tab === 'stats');
-  document.getElementById('fab').classList.toggle('visible', showFab);
-
-  currentTab = tab;
-  previousTab = tab;
-
-  if (tab === 'stats') renderStats();
-  if (tab === 'rivals') renderRivals();
-  if (tab === 'coach') renderCoach();
-  if (tab === 'settings') renderSettings();
-
-  updateDriveIndicator();
+  return cr.result.id;
 }
-
-// ==================== DATA ====================
-function resultFromSets(sets) {
-  let my = 0, op = 0;
-  for (const s of sets) {
-    if (parseInt(s.me) > parseInt(s.opp)) my++;
-    else if (parseInt(s.opp) > parseInt(s.me)) op++;
+async function uploadDrive(folderId) {
+  const body = JSON.stringify(D);
+  const meta = { name: FILE_NAME, parents: [folderId], mimeType: 'application/json' };
+  const boundary = 'ace_boundary';
+  const multipart = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${gapi.auth.getToken().access_token}`,
+      'Content-Type': `multipart/related; boundary=${boundary}`
+    }, body: multipart
+  });
+  const data = await res.json();
+  return data.id;
+}
+async function saveDrive() {
+  if (!isSignedIn || !gapiReady) return;
+  setSyncStatus('syncing', 'Saving…');
+  try {
+    const body = JSON.stringify(D);
+    if (!driveFileId) {
+      const folderId = await findOrCreateFolder(FOLDER);
+      driveFileId = await uploadDrive(folderId);
+    } else {
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${gapi.auth.getToken().access_token}`,
+          'Content-Type': 'application/json'
+        }, body
+      });
+    }
+    setSyncStatus('synced', 'Saved');
+  } catch(e) {
+    setSyncStatus('', 'Save failed');
   }
-  return my >= op ? 'W' : 'L';
 }
 
-function computeStats(matches) {
-  const wins = matches.filter(m => m.result === 'W').length;
-  const losses = matches.filter(m => m.result === 'L').length;
-  const total = wins + losses;
-  return { wins, losses, total, winRate: total ? Math.round((wins / total) * 100) : 0 };
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    if (b.textContent.toLowerCase().includes(name) ||
+        (name==='coach' && b.textContent.includes('Ace'))) b.classList.add('active');
+  });
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'matches') renderMatchList();
+  if (name === 'opponents') renderOpponents();
+  if (name === 'coach') scrollCoachToBottom();
 }
 
-function computeRivals(matches) {
-  const map = {};
-  for (const m of matches) {
-    const opp = m.opponent || 'Unknown';
-    if (!map[opp]) map[opp] = { wins: 0, losses: 0 };
-    if (m.result === 'W') map[opp].wins++;
-    else map[opp].losses++;
+// ═══════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════
+function renderAll() {
+  renderDashboard();
+  renderMatchList();
+  renderOpponents();
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDashboard() {
+  const stats = computeStats();
+  // Stat cards
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Matches</div>
+      <div class="stat-value">${stats.total}</div>
+      <div class="stat-sub">${stats.thisYear} this year</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Wins</div>
+      <div class="stat-value green">${stats.wins}</div>
+      <div class="stat-sub">${stats.total ? Math.round(stats.wins/stats.total*100) : 0}% win rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Losses</div>
+      <div class="stat-value red">${stats.losses}</div>
+      <div class="stat-sub">${stats.winStreak > 0 ? stats.winStreak+'W streak' : stats.loseStreak+'L streak'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sets Won %</div>
+      <div class="stat-value">${stats.setsTotal ? Math.round(stats.setsWon/stats.setsTotal*100) : 0}<span style="font-size:20px;color:var(--text2)">%</span></div>
+      <div class="stat-sub">${stats.setsWon} / ${stats.setsTotal} sets</div>
+    </div>
+  `;
+  drawChart(stats.monthly);
+  // Recent matches
+  const recent = [...D.matches].sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
+  const el = document.getElementById('recent-list');
+  if (!recent.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">🎾</div><div class="empty-text">No matches yet — log your first one!</div></div>'; return; }
+  el.innerHTML = recent.map(m => matchItemHTML(m)).join('');
+}
+
+function computeStats() {
+  const now = new Date();
+  const thisYear = now.getFullYear().toString();
+  let wins=0,losses=0,setsWon=0,setsTotal=0,thisYearCount=0;
+  const monthly = {};
+  // Prepare last 12 months
+  for (let i=11;i>=0;i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    monthly[key] = { played:0, wins:0 };
   }
-  return Object.entries(map)
-    .map(([name, r]) => ({ name, ...r, total: r.wins + r.losses }))
-    .sort((a, b) => b.total - a.total);
-}
-
-function currentStreak(matches) {
-  if (!matches.length) return { type: null, count: 0 };
-  const type = matches[0].result;
-  let count = 0;
-  for (const m of matches) {
-    if (m.result === type) count++;
-    else break;
+  D.matches.forEach(m => {
+    if (m.result === 'win') wins++; else losses++;
+    (m.score||[]).forEach(s => {
+      if (s.me > s.them) setsWon++; else if (s.them > s.me) {}
+      setsTotal++;
+    });
+    if (m.date?.startsWith(thisYear)) thisYearCount++;
+    const mk = m.date?.slice(0,7);
+    if (mk && monthly[mk]) { monthly[mk].played++; if(m.result==='win') monthly[mk].wins++; }
+  });
+  // Streak
+  const sorted = [...D.matches].sort((a,b) => b.date.localeCompare(a.date));
+  let winStreak=0,loseStreak=0;
+  for (const m of sorted) {
+    if (m.result==='win') { if(loseStreak===0) winStreak++; else break; }
+    else { if(winStreak===0) loseStreak++; else break; }
   }
-  return { type, count };
+  return { total: D.matches.length, wins, losses, setsWon, setsTotal, thisYear: thisYearCount, monthly, winStreak, loseStreak };
 }
 
-// ==================== RENDER STATS ====================
-function renderStats() {
-  const el = document.getElementById('stats-scroll');
-  const stats = computeStats(appData.matches);
-  const streak = currentStreak(appData.matches);
+function drawChart(monthly) {
+  const canvas = document.getElementById('main-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const keys = Object.keys(monthly);
+  const W = canvas.parentElement.clientWidth - 40;
+  canvas.width = Math.max(W, 300);
+  canvas.height = 160;
+  const cw = canvas.width, ch = canvas.height;
+  const pad = { top:20, right:10, bottom:40, left:30 };
+  const gw = cw - pad.left - pad.right;
+  const gh = ch - pad.top - pad.bottom;
+  ctx.clearRect(0,0,cw,ch);
+  const maxPlayed = Math.max(...keys.map(k => monthly[k].played), 1);
+  const barW = gw / keys.length * 0.5;
+  const barSpacing = gw / keys.length;
+  // Gridlines
+  ctx.strokeStyle = 'rgba(42,54,42,0.6)'; ctx.lineWidth = 1;
+  for (let i=0;i<=4;i++) {
+    const y = pad.top + gh - (i/4)*gh;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left+gw, y); ctx.stroke();
+  }
+  // Bars
+  keys.forEach((k, i) => {
+    const x = pad.left + i*barSpacing + barSpacing/2 - barW/2;
+    const played = monthly[k].played;
+    const barH = played ? (played/maxPlayed)*gh : 0;
+    const y = pad.top + gh - barH;
+    // Win portion
+    const winH = played ? (monthly[k].wins/maxPlayed)*gh : 0;
+    const loseH = barH - winH;
+    if (barH > 0) {
+      ctx.fillStyle = '#1a3d2a';
+      ctx.beginPath(); ctx.roundRect(x, y, barW, barH, [3,3,0,0]); ctx.fill();
+      ctx.fillStyle = '#4ade80';
+      ctx.beginPath(); ctx.roundRect(x, y+loseH, barW, winH, [3,3,0,0]); ctx.fill();
+    }
+    // Label
+    ctx.fillStyle = '#5a6a5a'; ctx.font = '10px DM Sans'; ctx.textAlign = 'center';
+    const parts = k.split('-');
+    const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(parts[1])-1];
+    ctx.fillText(mon, pad.left + i*barSpacing + barSpacing/2, ch - 4);
+    if (played > 0) {
+      ctx.fillStyle = '#9aaa9a'; ctx.font = '10px DM Mono';
+      ctx.fillText(played, pad.left + i*barSpacing + barSpacing/2, y-5);
+    }
+  });
+  // Win rate line
+  ctx.strokeStyle = 'rgba(74,222,128,0.5)'; ctx.lineWidth = 2; ctx.setLineDash([3,3]);
+  ctx.beginPath();
+  let first = true;
+  keys.forEach((k, i) => {
+    if (!monthly[k].played) return;
+    const wr = monthly[k].wins/monthly[k].played;
+    const x = pad.left + i*barSpacing + barSpacing/2;
+    const y = pad.top + gh - wr*gh;
+    if (first) { ctx.moveTo(x,y); first=false; } else ctx.lineTo(x,y);
+  });
+  ctx.stroke(); ctx.setLineDash([]);
+}
 
-  let html = `<div class="stat-grid">
-    <div class="stat-box"><div class="stat-num">${stats.wins}</div><div class="stat-label">Wins</div></div>
-    <div class="stat-box"><div class="stat-num">${stats.losses}</div><div class="stat-label">Losses</div></div>
-    <div class="stat-box wide">
-      <div class="stat-num">${stats.winRate}<span style="font-size:24px;color:var(--muted)">%</span></div>
-      <div class="stat-label">Win Rate</div>
-      <div class="winrate-bar"><div class="winrate-fill" style="width:${stats.winRate}%"></div></div>
+// ═══════════════════════════════════════════════
+// MATCH HTML
+// ═══════════════════════════════════════════════
+function matchItemHTML(m) {
+  const opp = D.opponents.find(o => o.id === m.opponent);
+  const oppName = opp ? opp.name : m.opponent || 'Unknown';
+  const scoreHtml = (m.score||[]).map(s => {
+    const won = s.me > s.them;
+    return `<span class="set ${won?'won':'lost'}">${s.me}-${s.them}</span>`;
+  }).join('');
+  const surface = m.surface || 'hard';
+  const dateStr = m.date ? new Date(m.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
+  return `<div class="match-item" data-id="${m.id}">
+    <div class="match-result-badge ${m.result}">${m.result==='win'?'W':'L'}</div>
+    <div class="match-info">
+      <div class="match-opponent">${oppName}</div>
+      <div class="match-meta">${dateStr}${m.location?' · '+m.location:''} <span class="surface-badge ${surface}">${surface}</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+      <div class="match-score">${scoreHtml}</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="editMatch('${m.id}')">Edit</button>
+        <button class="btn-danger" style="font-size:11px;padding:4px 8px;" onclick="deleteMatch('${m.id}')">Del</button>
+      </div>
     </div>
   </div>`;
-
-  if (streak.count >= 2) {
-    const cls = streak.type === 'W' ? 'hot' : 'cold';
-    const emoji = streak.type === 'W' ? '🔥' : '❄️';
-    html += `<div style="margin-bottom:16px">
-      <span class="streak-chip ${cls}">${emoji} ${streak.count}-match ${streak.type === 'W' ? 'win' : 'loss'} streak</span>
-    </div>`;
-  }
-
-  html += `<div class="section-label">Recent Matches</div>`;
-
-  if (!appData.matches.length) {
-    html += `<div class="empty-state">
-      <div class="empty-icon">🎾</div>
-      <div class="empty-title">No matches yet</div>
-      <div class="empty-sub">Tap + to log your first match</div>
-    </div>`;
-  } else {
-    appData.matches.forEach(m => {
-      const sets = m.sets.map(s => `${s.me}-${s.opp}`).join(' ');
-      html += `<div class="match-card" onclick="showDetail('${m.id}')">
-        <div class="result-badge ${m.result}">${m.result}</div>
-        <div class="match-info">
-          <div class="match-opponent">vs ${escHtml(m.opponent)}</div>
-          <div class="match-meta">${m.date}${m.location ? ' · ' + escHtml(m.location) : ''}</div>
-        </div>
-        <div class="match-sets">${sets}</div>
-      </div>`;
-    });
-  }
-
-  el.innerHTML = html;
 }
 
-// ==================== RENDER RIVALS ====================
-function renderRivals() {
-  const el = document.getElementById('rivals-scroll');
-  const rivals = computeRivals(appData.matches);
-
-  if (!rivals.length) {
-    el.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">⚔️</div>
-      <div class="empty-title">No rivals yet</div>
-      <div class="empty-sub">Log matches to see head-to-head records</div>
-    </div>`;
+function renderMatchList() {
+  const el = document.getElementById('match-list');
+  const sorted = [...D.matches].sort((a,b) => b.date.localeCompare(a.date));
+  if (!sorted.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🎾</div><div class="empty-text">No matches logged yet.</div></div>';
     return;
   }
+  el.innerHTML = sorted.map(m => matchItemHTML(m)).join('');
+}
 
-  el.innerHTML = rivals.map(r => {
-    const initials = r.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-    const pct = r.total ? Math.round((r.wins / r.total) * 100) : 0;
-    return `<div class="rival-card">
-      <div class="rival-avatar">${initials}</div>
-      <div style="flex:1;min-width:0">
-        <div class="rival-name">${escHtml(r.name)}</div>
-        <div class="rival-record">${r.total} match${r.total !== 1 ? 'es' : ''} · ${pct}% win rate</div>
-        <div class="winrate-bar" style="margin-top:6px;max-width:120px">
-          <div class="winrate-fill" style="width:${pct}%"></div>
-        </div>
-      </div>
-      <div class="rival-wl">
-        <div class="rival-wl-num"><span class="w">${r.wins}</span><span class="sep">/</span><span class="l">${r.losses}</span></div>
-        <div class="rival-wl-label">W / L</div>
-      </div>
-    </div>`;
+// ═══════════════════════════════════════════════
+// ADD / EDIT MATCH
+// ═══════════════════════════════════════════════
+function openAddMatch() {
+  editMatchId = null;
+  document.getElementById('match-modal-title').textContent = 'Log Match';
+  document.getElementById('m-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('m-location').value = '';
+  document.getElementById('m-surface').value = 'hard';
+  populateOpponentSelect();
+  resetSetsBuilder();
+  document.getElementById('modal-match').classList.add('open');
+}
+function editMatch(id) {
+  const m = D.matches.find(x => x.id === id);
+  if (!m) return;
+  editMatchId = id;
+  document.getElementById('match-modal-title').textContent = 'Edit Match';
+  document.getElementById('m-date').value = m.date;
+  document.getElementById('m-location').value = m.location || '';
+  document.getElementById('m-surface').value = m.surface || 'hard';
+  populateOpponentSelect(m.opponent);
+  resetSetsBuilder(m.score || []);
+  document.getElementById('modal-match').classList.add('open');
+}
+function populateOpponentSelect(selected) {
+  const sel = document.getElementById('m-opponent');
+  sel.innerHTML = '<option value="">Select opponent</option>' +
+    D.opponents.map(o => `<option value="${o.id}" ${o.id===selected?'selected':''}>${o.name}</option>`).join('');
+}
+function resetSetsBuilder(sets) {
+  const builder = document.getElementById('sets-builder');
+  builder.innerHTML = '';
+  const initial = sets && sets.length ? sets : [{me:'',them:''}];
+  initial.forEach((s,i) => addSetRow(s.me, s.them));
+}
+function addSetRow(me='', them='') {
+  const builder = document.getElementById('sets-builder');
+  const rows = builder.querySelectorAll('.set-row').length + 1;
+  if (rows > 3) { showToast('Max 3 sets (Best of 3)'); return; }
+  const div = document.createElement('div');
+  div.className = 'set-row';
+  div.innerHTML = `
+    <span class="set-row-label">Set ${rows}</span>
+    <input class="set-score-input" type="number" min="0" max="99" value="${me}" placeholder="0">
+    <span class="set-vs">—</span>
+    <input class="set-score-input" type="number" min="0" max="99" value="${them}" placeholder="0">
+    <button class="btn-rm-set" onclick="removeSetRow(this)">−</button>
+  `;
+  builder.appendChild(div);
+  renumberSets();
+}
+function removeSetRow(btn) {
+  const builder = document.getElementById('sets-builder');
+  if (builder.querySelectorAll('.set-row').length <= 1) { showToast('Need at least 1 set'); return; }
+  btn.closest('.set-row').remove();
+  renumberSets();
+}
+function renumberSets() {
+  document.querySelectorAll('.set-row').forEach((r,i) => {
+    r.querySelector('.set-row-label').textContent = `Set ${i+1}`;
+  });
+}
+function collectSets() {
+  const sets = [];
+  document.querySelectorAll('.set-row').forEach(r => {
+    const inputs = r.querySelectorAll('.set-score-input');
+    const me = parseInt(inputs[0].value) || 0;
+    const them = parseInt(inputs[1].value) || 0;
+    sets.push({ me, them });
+  });
+  return sets;
+}
+function determineResult(sets) {
+  let myWins=0, theirWins=0;
+  sets.forEach(s => { if(s.me > s.them) myWins++; else theirWins++; });
+  return myWins > theirWins ? 'win' : 'loss';
+}
+function saveMatch() {
+  const date = document.getElementById('m-date').value;
+  const opponent = document.getElementById('m-opponent').value;
+  const surface = document.getElementById('m-surface').value;
+  const location = document.getElementById('m-location').value.trim();
+  if (!date) { showToast('Please enter a date'); return; }
+  if (!opponent) { showToast('Please select an opponent'); return; }
+  const score = collectSets();
+  const result = determineResult(score);
+  if (editMatchId) {
+    const m = D.matches.find(x => x.id === editMatchId);
+    Object.assign(m, { date, opponent, surface, location, score, result });
+  } else {
+    D.matches.push({ id: uid(), date, opponent, surface, location, score, result });
+  }
+  saveLocal(); saveDrive();
+  closeModal('modal-match');
+  renderAll();
+  showToast(editMatchId ? 'Match updated' : 'Match logged ✓');
+}
+function deleteMatch(id) {
+  if (!confirm('Delete this match?')) return;
+  D.matches = D.matches.filter(m => m.id !== id);
+  saveLocal(); saveDrive();
+  renderAll();
+  showToast('Match deleted');
+}
+
+// ═══════════════════════════════════════════════
+// OPPONENTS
+// ═══════════════════════════════════════════════
+function renderOpponents() {
+  const tbody = document.getElementById('opp-tbody');
+  if (!D.opponents.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">No opponents yet.</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = D.opponents.map(o => {
+    const matches = D.matches.filter(m => m.opponent === o.id);
+    const wins = matches.filter(m => m.result === 'win').length;
+    const losses = matches.length - wins;
+    const wr = matches.length ? Math.round(wins/matches.length*100) : 0;
+    return `<tr>
+      <td><strong>${o.name}</strong></td>
+      <td>${matches.length}</td>
+      <td><span style="color:var(--green)">${wins}W</span> <span style="color:var(--text3)">/</span> <span style="color:var(--red)">${losses}L</span></td>
+      <td>
+        <div>${wr}%</div>
+        <div class="win-rate-bar"><div class="win-rate-fill" style="width:${wr}%"></div></div>
+      </td>
+      <td>
+        <button class="btn-danger" style="font-size:11px;padding:4px 8px;" onclick="deleteOpponent('${o.id}')">Del</button>
+      </td>
+    </tr>`;
   }).join('');
 }
-
-// ==================== RENDER COACH ====================
-function renderCoach() {
-  const hasApiKey = !!(appData.apiKey || (driveConnected && appData.apiKey));
-  const inputBar = document.getElementById('coach-input-bar');
-  const messagesEl = document.getElementById('coach-messages');
-
-  if (!appData.apiKey) {
-    if (!messagesEl.querySelector('.coach-locked')) {
-      messagesEl.innerHTML = `<div class="coach-locked">
-        <div class="coach-locked-icon">🔒</div>
-        <div style="font-weight:600;color:var(--text)">Coach unavailable</div>
-        <div>Add your Claude API key in Settings → Connect Drive, then store the key in your ace-tennis-data.json, or enter it below.</div>
-        <div style="width:100%;margin-top:8px">
-          <input class="form-input" id="inline-apikey" placeholder="sk-ant-..." type="password">
-          <button class="btn btn-primary mt-8" onclick="saveInlineApiKey()">Save API Key</button>
-        </div>
-      </div>`;
-    }
-    inputBar.style.display = 'none';
-    return;
+function openAddOpponent() {
+  document.getElementById('opp-name-input').value = '';
+  document.getElementById('modal-opponent').classList.add('open');
+}
+function saveOpponent() {
+  const name = document.getElementById('opp-name-input').value.trim();
+  if (!name) { showToast('Enter a name'); return; }
+  if (D.opponents.find(o => o.name.toLowerCase() === name.toLowerCase())) { showToast('Opponent already exists'); return; }
+  D.opponents.push({ id: uid(), name });
+  saveLocal(); saveDrive();
+  closeModal('modal-opponent');
+  renderOpponents();
+  showToast('Opponent added ✓');
+}
+function deleteOpponent(id) {
+  if (D.matches.find(m => m.opponent === id)) {
+    if (!confirm('This opponent has match history. Delete anyway?')) return;
   }
-
-  inputBar.style.display = 'flex';
-
-  if (!coachHistory.length) {
-    messagesEl.innerHTML = `<div class="msg msg-ai">
-      Hey! I'm your personal tennis coach. I have access to all your match history.
-      Ask me anything — technique tips, match analysis, training advice, or patterns in your game. What's on your mind?
-    </div>`;
-  }
+  D.opponents = D.opponents.filter(o => o.id !== id);
+  saveLocal(); saveDrive();
+  renderOpponents();
+  showToast('Opponent deleted');
 }
 
-function saveInlineApiKey() {
-  const key = document.getElementById('inline-apikey')?.value.trim();
-  if (!key) return;
-  appData.apiKey = key;
-  saveLocal();
-  coachHistory = [];
-  renderCoach();
-  toast('API key saved');
+// ═══════════════════════════════════════════════
+// COACH (ACE)
+// ═══════════════════════════════════════════════
+function initCoachChat() {
+  const el = document.getElementById('coach-messages');
+  el.innerHTML = '';
+  if (!D.coach.messages.length) {
+    const name = D.settings.name || 'there';
+    appendCoachMsg('ace', `Hey ${name}! I'm Ace, your personal tennis coach 🎾\n\nYou can ask me anything about your game — technique, strategy, fitness, or mental game. You can also upload a short video clip and I'll give you feedback on what I see.\n\nWhat are we working on today?`, new Date().toISOString());
+  } else {
+    D.coach.messages.forEach(m => appendCoachMsg(m.role, m.content, m.timestamp));
+  }
+  scrollCoachToBottom();
 }
 
-function clearCoachChat() {
-  coachHistory = [];
-  document.getElementById('coach-messages').innerHTML = '';
-  renderCoach();
+function appendCoachMsg(role, content, timestamp) {
+  const el = document.getElementById('coach-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const avatar = role === 'ace' ? '🎾' : (D.settings.name ? D.settings.name[0].toUpperCase() : 'U');
+  const time = timestamp ? new Date(timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+  div.innerHTML = `
+    <div class="msg-avatar">${avatar}</div>
+    <div>
+      <div class="msg-bubble">${escapeHtml(content).replace(/\n/g,'<br>')}</div>
+      <div class="msg-time">${time}</div>
+    </div>
+  `;
+  el.appendChild(div);
+  scrollCoachToBottom();
+}
+
+function scrollCoachToBottom() {
+  const el = document.getElementById('coach-messages');
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+function handleClipSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 50 * 1024 * 1024) { showToast('Clip too large (max 50MB)'); input.value=''; return; }
+  pendingClipFile = file;
+  document.getElementById('clip-name').textContent = file.name;
+  document.getElementById('clip-clear').style.display = 'block';
+  // Read as base64
+  const reader = new FileReader();
+  reader.onload = e => { pendingClipBase64 = e.target.result.split(',')[1]; };
+  reader.readAsDataURL(file);
+}
+
+function clearClip() {
+  pendingClipFile = null;
+  pendingClipBase64 = null;
+  document.getElementById('clip-input').value = '';
+  document.getElementById('clip-name').textContent = '';
+  document.getElementById('clip-clear').style.display = 'none';
+}
+
+function coachKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCoachMessage(); }
+}
+
+function autoResize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
 }
 
 async function sendCoachMessage() {
-  const input = document.getElementById('coach-input');
-  const text = input.value.trim();
-  if (!text || !appData.apiKey) return;
-
-  input.value = '';
-  const messagesEl = document.getElementById('coach-messages');
-
-  // Add user msg
-  const userDiv = document.createElement('div');
-  userDiv.className = 'msg msg-user';
-  userDiv.textContent = text;
-  messagesEl.appendChild(userDiv);
-
-  // Typing indicator
-  const typingDiv = document.createElement('div');
-  typingDiv.className = 'msg msg-ai typing';
-  typingDiv.textContent = 'Thinking…';
-  messagesEl.appendChild(typingDiv);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-
-  // Build system prompt with match data
-  const systemPrompt = buildCoachSystemPrompt();
-
-  coachHistory.push({ role: 'user', content: text });
-
+  const ta = document.getElementById('coach-input');
+  const text = ta.value.trim();
+  const hasClip = !!pendingClipBase64;
+  if (!text && !hasClip) return;
+  const btn = document.getElementById('coach-send-btn');
+  btn.disabled = true;
+  const userMsg = text || (hasClip ? '(Video clip attached)' : '');
+  const ts = new Date().toISOString();
+  // Show user message
+  appendCoachMsg('user', userMsg + (hasClip ? '\n📎 ' + (pendingClipFile?.name||'clip') : ''), ts);
+  // Save to D.coach
+  if (!D.coach.messages.length) {
+    // first real message
+  }
+  D.coach.messages.push({ role: 'user', content: userMsg + (hasClip ? '\n[video clip: '+pendingClipFile?.name+']' : ''), timestamp: ts });
+  ta.value = ''; ta.style.height = 'auto';
+  const clipFile = pendingClipFile;
+  const clipB64 = pendingClipBase64;
+  clearClip();
+  // Show typing
+  const typing = showTyping();
+  // Build history for API
+  const stats = computeStats();
+  const systemPrompt = buildCoachSystem(stats);
+  const messages = buildCoachMessages(userMsg, clipB64, clipFile);
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': appData.apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: coachHistory
-      })
+    const reply = await callAnthropicCoach(systemPrompt, messages);
+    removeTyping(typing);
+    const replyTs = new Date().toISOString();
+    appendCoachMsg('ace', reply, replyTs);
+    D.coach.messages.push({ role: 'assistant', content: reply, timestamp: replyTs });
+    saveLocal(); saveDrive();
+  } catch(e) {
+    removeTyping(typing);
+    appendCoachMsg('ace', 'Sorry, I had trouble connecting. Please check your network and try again.', new Date().toISOString());
+  }
+  btn.disabled = false;
+}
+
+function buildCoachSystem(stats) {
+  const name = D.settings.name || 'the player';
+  const recentMatches = [...D.matches].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).map(m => {
+    const opp = D.opponents.find(o=>o.id===m.opponent);
+    const scoreStr = (m.score||[]).map(s=>`${s.me}-${s.them}`).join(', ');
+    return `${m.date}: ${m.result==='win'?'Win':'Loss'} vs ${opp?.name||'Unknown'} (${scoreStr}) on ${m.surface}`;
+  }).join('\n');
+  return `You are Ace, an expert tennis coach and analyst. You are coaching ${name}.
+
+Player stats:
+- Total matches: ${stats.total}
+- Win rate: ${stats.total ? Math.round(stats.wins/stats.total*100) : 0}%
+- Sets won: ${stats.setsWon}/${stats.setsTotal}
+- Current streak: ${stats.winStreak > 0 ? stats.winStreak+'W' : stats.loseStreak+'L'}
+
+Recent matches:
+${recentMatches || 'None yet'}
+
+Your role:
+- Give practical, actionable coaching advice
+- Analyse video clips when provided and give specific feedback on technique, positioning, footwork
+- Be encouraging but honest
+- Remember the player's history across this conversation
+- Ask clarifying questions when needed
+- Keep responses concise but thorough
+
+Respond in plain text, no markdown formatting.`;
+}
+
+function buildCoachMessages(text, clipB64, clipFile) {
+  // Build from history + new message
+  const history = D.coach.messages.slice(0, -1); // exclude the one we just pushed
+  const msgs = [];
+  history.forEach(m => {
+    msgs.push({ role: m.role === 'ace' ? 'assistant' : 'user', content: m.content });
+  });
+  // New user message
+  if (clipB64 && clipFile) {
+    msgs.push({
+      role: 'user',
+      content: [
+        { type: 'text', text: text || 'Please analyse this tennis clip and give me feedback.' },
+        { type: 'image', source: { type: 'base64', media_type: clipFile.type.startsWith('video') ? 'image/jpeg' : clipFile.type, data: clipB64 } }
+      ]
     });
-
-    const data = await response.json();
-
-    if (data.error) throw new Error(data.error.message);
-
-    const reply = data.content[0].text;
-    coachHistory.push({ role: 'assistant', content: reply });
-
-    typingDiv.className = 'msg msg-ai';
-    typingDiv.textContent = reply;
-  } catch (err) {
-    typingDiv.className = 'msg msg-ai';
-    typingDiv.style.color = 'var(--loss)';
-    typingDiv.textContent = 'Error: ' + (err.message || 'Could not reach coach. Check your API key.');
-  }
-
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-function buildCoachSystemPrompt() {
-  const lines = appData.matches.slice(0, 30).map(m => {
-    const sets = (m.sets||[]).map(s => `${s.me}-${s.opp}`).join(', ');
-    return `${m.date} vs ${m.opponent}${m.location ? ' @ ' + m.location : ''}: ${m.result} (${sets})${m.notes ? ' — ' + m.notes : ''}`;
-  });
-
-  const stats = computeStats(appData.matches);
-  const rivals = computeRivals(appData.matches);
-
-  return `You are a personal tennis coach AI. Be concise, warm, practical, and encouraging.
-
-Player's stats: ${stats.wins}W / ${stats.losses}L (${stats.winRate}% win rate)
-
-Top rivals:
-${rivals.slice(0, 5).map(r => `- ${r.name}: ${r.wins}W/${r.losses}L`).join('\n')}
-
-Recent matches (most recent first):
-${lines.join('\n')}
-
-Analyse patterns, give specific actionable advice, and answer questions naturally. Keep replies focused and under 200 words unless detail is needed.`;
-}
-
-// ==================== RENDER SETTINGS ====================
-function renderSettings() {
-  const clientId = appData.clientId || localStorage.getItem('ace_client_id') || '';
-  document.getElementById('settings-client-id').value = clientId;
-  updateDriveSettingsUI();
-}
-
-function updateDriveSettingsUI() {
-  const dot = document.getElementById('settings-drive-dot');
-  const text = document.getElementById('settings-drive-text');
-  const sub = document.getElementById('settings-drive-sub');
-  const btnConnect = document.getElementById('btn-drive-connect');
-  const btnSync = document.getElementById('btn-drive-sync');
-  const btnDisconnect = document.getElementById('btn-drive-disconnect');
-
-  if (driveConnected) {
-    dot.className = 'drive-dot connected';
-    text.textContent = 'Connected';
-    sub.textContent = 'Data syncing to Google Drive';
-    btnConnect.style.display = 'none';
-    btnSync.style.display = 'block';
-    btnDisconnect.style.display = 'block';
   } else {
-    dot.className = 'drive-dot';
-    text.textContent = 'Not connected';
-    sub.textContent = 'Data stored locally only';
-    btnConnect.style.display = 'block';
-    btnSync.style.display = 'none';
-    btnDisconnect.style.display = 'none';
+    msgs.push({ role: 'user', content: text });
   }
+  return msgs;
 }
 
-function updateDriveIndicator() {
-  const el = document.getElementById('drive-indicator');
-  if (driveConnected) {
-    el.className = 'streak-chip hot';
-    el.innerHTML = '☁️ Synced';
-  } else {
-    el.className = 'streak-chip';
-    el.innerHTML = '☁️ Offline';
-  }
-}
-
-// ==================== LOG MATCH ====================
-function openLogSheet() {
-  document.getElementById('log-opponent').value = '';
-  document.getElementById('log-notes').value = '';
-  document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('log-location-text').style.display = 'none';
-
-  // populate venue dropdown
-  const sel = document.getElementById('log-location-select');
-  sel.innerHTML = '<option value="">Select or add new…</option>';
-  (appData.venues || []).forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v; opt.textContent = v;
-    sel.appendChild(opt);
+async function callAnthropicCoach(system, messages) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system,
+      messages
+    })
   });
-  const newOpt = document.createElement('option');
-  newOpt.value = '__new__'; newOpt.textContent = '+ Add new venue';
-  sel.appendChild(newOpt);
-
-  // reset sets
-  document.getElementById('log-sets').innerHTML = '';
-  addSetRow();
-  addSetRow();
-
-  openSheet('sheet-log');
+  if (!res.ok) throw new Error('API error ' + res.status);
+  const data = await res.json();
+  return data.content?.map(c => c.text || '').join('') || 'No response';
 }
 
-function handleLocationSelect(sel) {
-  const textInput = document.getElementById('log-location-text');
-  if (sel.value === '__new__') {
-    textInput.style.display = 'block';
-    textInput.value = '';
-    textInput.focus();
-  } else {
-    textInput.style.display = 'none';
-  }
+function showTyping() {
+  const el = document.getElementById('coach-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ace'; div.id = 'typing-msg';
+  div.innerHTML = `<div class="msg-avatar">🎾</div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  el.appendChild(div);
+  scrollCoachToBottom();
+  return div;
 }
+function removeTyping(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
 
-function addSetRow() {
-  const container = document.getElementById('log-sets');
-  const setNum = container.children.length + 1;
-  const row = document.createElement('div');
-  row.className = 'set-row';
-  row.innerHTML = `
-    <span class="set-label">Set ${setNum}</span>
-    <input class="set-score-input" type="number" min="0" max="99" placeholder="0" inputmode="numeric">
-    <span class="set-divider">–</span>
-    <input class="set-score-input" type="number" min="0" max="99" placeholder="0" inputmode="numeric">
-    <button class="set-remove" onclick="removeSetRow(this)" title="Remove">×</button>
-  `;
-  container.appendChild(row);
-  renumberSets();
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showToast(msg, duration=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
 }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-function removeSetRow(btn) {
-  const row = btn.closest('.set-row');
-  row.remove();
-  renumberSets();
-}
-
-function renumberSets() {
-  document.querySelectorAll('#log-sets .set-row').forEach((row, i) => {
-    row.querySelector('.set-label').textContent = `Set ${i + 1}`;
-  });
-}
-
-function saveMatch() {
-  const opponent = document.getElementById('log-opponent').value.trim();
-  if (!opponent) { toast('Enter opponent name'); return; }
-
-  const rows = document.querySelectorAll('#log-sets .set-row');
-  if (!rows.length) { toast('Add at least one set'); return; }
-
-  const sets = [];
-  let valid = true;
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll('.set-score-input');
-    const me = inputs[0].value;
-    const opp = inputs[1].value;
-    if (me === '' || opp === '') { valid = false; return; }
-    sets.push({ me: parseInt(me), opp: parseInt(opp) });
-  });
-  if (!valid) { toast('Fill in all set scores'); return; }
-
-  // Handle location
-  const locSel = document.getElementById('log-location-select');
-  let location = locSel.value === '__new__' || locSel.value === ''
-    ? document.getElementById('log-location-text').value.trim()
-    : locSel.value;
-
-  if (location && !appData.venues.includes(location)) {
-    appData.venues.push(location);
-  }
-
-  const match = {
-    id: Date.now().toString() + Math.random().toString(36).slice(2, 5),
-    date: document.getElementById('log-date').value || new Date().toISOString().split('T')[0],
-    opponent,
-    location,
-    sets,
-    notes: document.getElementById('log-notes').value.trim(),
-    result: resultFromSets(sets)
-  };
-
-  appData.matches.unshift(match);
-  saveLocal();
-  closeSheet('sheet-log');
-  renderStats();
-  toast(`${match.result === 'W' ? 'Win' : 'Loss'} logged ✓`);
-
-  if (driveConnected) syncToDrive();
-}
-
-// ==================== MATCH DETAIL ====================
-function showDetail(id) {
-  const match = appData.matches.find(m => m.id === id);
-  if (!match) return;
-
-  document.getElementById('detail-result').textContent = match.result;
-  document.getElementById('detail-result').className = 'detail-result-big ' + match.result;
-  document.getElementById('detail-opponent').textContent = 'vs ' + match.opponent;
-  document.getElementById('detail-date').textContent = match.date + (match.location ? ' · ' + match.location : '');
-
-  // Sets breakdown
-  let setsHtml = match.sets.map((s, i) => {
-    const myWin = parseInt(s.me) > parseInt(s.opp);
-    return `<div class="set-detail-row">
-      <span class="set-detail-label">Set ${i + 1}</span>
-      <span class="set-score-display ${myWin ? 'set-win' : 'set-loss'}">${s.me} – ${s.opp}</span>
-    </div>`;
-  }).join('');
-
-  let detailHtml = `<div class="card">${setsHtml}</div>`;
-
-  if (match.notes) {
-    detailHtml += `<div class="section-label">Notes</div>
-    <div class="card"><p style="font-size:14px;line-height:1.6;color:var(--text)">${escHtml(match.notes)}</p></div>`;
-  }
-
-  detailHtml += `<div style="margin-top:24px">
-    <button class="btn btn-danger" onclick="deleteMatch('${match.id}')">Delete Match</button>
-  </div>`;
-
-  document.getElementById('detail-scroll').innerHTML = detailHtml;
-
-  // Show detail screen
-  ['stats','rivals','coach','settings'].forEach(t => {
-    document.getElementById('screen-' + t).classList.remove('active');
-  });
-  document.getElementById('fab').classList.remove('visible');
-  document.getElementById('screen-detail').classList.add('active');
-}
-
-function closeDetail() {
-  document.getElementById('screen-detail').classList.remove('active');
-  navigate(previousTab);
-}
-
-function deleteMatch(id) {
-  if (!confirm('Delete this match?')) return;
-  appData.matches = appData.matches.filter(m => m.id !== id);
-  saveLocal();
-  closeDetail();
-  toast('Match deleted');
-  if (driveConnected) syncToDrive();
-}
-
-// ==================== GOOGLE DRIVE ====================
-function startDriveAuth() {
-  const clientId = document.getElementById('settings-client-id')?.value.trim()
-    || localStorage.getItem('ace_client_id')
-    || appData.clientId;
-
-  if (!clientId) {
-    openSheet('sheet-clientid');
-    return;
-  }
-
-  appData.clientId = clientId;
-  localStorage.setItem('ace_client_id', clientId);
-  saveLocal();
-  launchOAuthPopup(clientId);
-}
-
-// ==================== GOOGLE AUTH (matches Ledger app pattern exactly) ====================
-let gapiOk = false;
-let tokenClient = null;
-
-function gapiLoaded() {
-  gapi.load('client', async () => {
-    try {
-      await gapi.client.init({
-        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
-      });
-      // Init token client now if we already have a clientId
-      const clientId = appData.clientId || localStorage.getItem('ace_client_id');
-      if (clientId) {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: clientId,
-          scope: 'https://www.googleapis.com/auth/drive.file',
-          callback: async r => {
-            if (r.error) { toast('Drive auth failed: ' + r.error); resetConnectBtn(); return; }
-            accessToken = gapi.client.getToken().access_token;
-            localStorage.setItem('ace_gtoken', JSON.stringify(gapi.client.getToken()));
-            await onDriveConnected();
-          }
-        });
-      }
-      gapiOk = true;
-      // Silent reconnect on load
-      silentAuth();
-    } catch(e) { console.error('GAPI init error:', e); }
-  });
-}
-
-function gsiLoaded() {}
-
-function resetConnectBtn() {
-  const btn = document.querySelector('#screen-onboarding .btn-primary');
-  if (btn) { btn.textContent = 'Connect Google Drive'; btn.disabled = false; }
-}
-
-async function launchOAuthPopup(clientId) {
-  // Show loading state
-  const btn = document.querySelector('#screen-onboarding .btn-primary');
-  if (btn) { btn.textContent = 'Connecting…'; btn.disabled = true; }
-
-  appData.clientId = clientId;
-  localStorage.setItem('ace_client_id', clientId);
-  saveLocal();
-
-  // Wait for gapi if not ready yet (same pattern as Ledger)
-  if (!gapiOk) {
-    let waited = 0;
-    const wait = () => new Promise(r => setTimeout(r, 200));
-    while (!gapiOk && waited < 8000) { await wait(); waited += 200; }
-    if (!gapiOk) {
-      toast('Google API failed to load. Check connection and try again.');
-      resetConnectBtn();
-      return;
-    }
-  }
-
-  // Build token client with current clientId
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: clientId,
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    callback: async r => {
-      if (r.error) { toast('Drive auth failed: ' + r.error); resetConnectBtn(); return; }
-      accessToken = gapi.client.getToken().access_token;
-      localStorage.setItem('ace_gtoken', JSON.stringify(gapi.client.getToken()));
-      await onDriveConnected();
-    }
-  });
-
-  // Try stored token first (silent)
-  const stored = localStorage.getItem('ace_gtoken');
-  if (stored) {
-    try {
-      gapi.client.setToken(JSON.parse(stored));
-      accessToken = gapi.client.getToken().access_token;
-      await onDriveConnected();
-      return;
-    } catch(e) { localStorage.removeItem('ace_gtoken'); }
-  }
-
-  // Request token — uses existing Google session, no popup
-  tokenClient.requestAccessToken({ prompt: '' });
-}
-
-function silentAuth() {
-  if (!gapiOk) return;
-  const stored = localStorage.getItem('ace_gtoken');
-  if (!stored) return;
-  try {
-    gapi.client.setToken(JSON.parse(stored));
-    accessToken = gapi.client.getToken().access_token;
-    onDriveConnected();
-  } catch(e) { localStorage.removeItem('ace_gtoken'); }
-}
-
-async function onDriveConnected() {
-  driveConnected = true;
-  localStorage.setItem('ace_onboarded', '1');
-  toast('Connected to Google Drive ☁️');
-  updateDriveSettingsUI();
-  updateDriveIndicator();
-  showApp();
-  await loadFromDrive();
-  renderStats();
-}
-
-async function loadFromDrive() {
-  try {
-    // Search for existing file
-    const searchRes = await fetch(
-      `https://www.googleapis.com/drive/v3/files?q=name%3D%27ace-tennis-data.json%27+and+trashed%3Dfalse&fields=files(id,name)`,
-      { headers: { Authorization: 'Bearer ' + accessToken } }
-    );
-    const searchData = await searchRes.json();
-
-    if (searchData.files && searchData.files.length > 0) {
-      driveFileId = searchData.files[0].id;
-      const fileRes = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,
-        { headers: { Authorization: 'Bearer ' + accessToken } }
-      );
-      const driveData = await fileRes.json();
-      appData = { ...appData, ...driveData };
-      saveLocal();
-      toast('Data loaded from Drive ✓');
-    } else {
-      // Create new file
-      await syncToDrive();
-    }
-  } catch (e) {
-    toast('Drive error: ' + e.message);
-  }
-}
-
-async function syncToDrive() {
-  if (!driveConnected || !accessToken) return;
-
-  const dot = document.getElementById('settings-drive-dot');
-  if (dot) dot.className = 'drive-dot syncing';
-
-  try {
-    const body = JSON.stringify(appData);
-    const metadata = { name: 'ace-tennis-data.json', mimeType: 'application/json' };
-
-    if (driveFileId) {
-      // Update
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', new Blob([body], { type: 'application/json' }));
-      await fetch(
-        `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`,
-        { method: 'PATCH', headers: { Authorization: 'Bearer ' + accessToken }, body: form }
-      );
-    } else {
-      // Create
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', new Blob([body], { type: 'application/json' }));
-      const res = await fetch(
-        `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id`,
-        { method: 'POST', headers: { Authorization: 'Bearer ' + accessToken }, body: form }
-      );
-      const created = await res.json();
-      driveFileId = created.id;
-    }
-
-    if (dot) dot.className = 'drive-dot connected';
-  } catch (e) {
-    if (dot) dot.className = 'drive-dot';
-    toast('Sync failed: ' + e.message);
-  }
-}
-
-function syncNow() {
-  syncToDrive().then(() => toast('Synced ✓'));
-}
-
-function disconnectDrive() {
-  if (!confirm('Disconnect Google Drive? Data stays locally.')) return;
-  driveConnected = false;
-  accessToken = null;
-  driveFileId = null;
-  updateDriveSettingsUI();
-  updateDriveIndicator();
-  toast('Disconnected');
-}
-
-function saveClientId() {
-  const id = document.getElementById('settings-client-id').value.trim();
-  if (!id) { toast('Enter a Client ID'); return; }
-  appData.clientId = id;
-  localStorage.setItem('ace_client_id', id);
-  saveLocal();
-  toast('Client ID saved');
-}
-
-function saveClientIdAndAuth() {
-  const id = document.getElementById('input-client-id').value.trim();
-  if (!id) { toast('Enter a Client ID'); return; }
-  appData.clientId = id;
-  localStorage.setItem('ace_client_id', id);
-  saveLocal();
-  closeSheet('sheet-clientid');
-  if (document.getElementById('settings-client-id')) {
-    document.getElementById('settings-client-id').value = id;
-  }
-  launchOAuthPopup(id);
-}
-
-// ==================== MISC ====================
-function exportData() {
-  const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'ace-tennis-data.json';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function confirmClearData() {
-  if (!confirm('Clear all match data? This cannot be undone.')) return;
-  appData = { matches: [], venues: [], apiKey: '', clientId: appData.clientId, version: 1 };
-  saveLocal();
-  renderStats();
-  toast('Data cleared');
-}
-
-function showClientIdInfo() {
-  openSheet('sheet-clientid');
-}
-
-function openSheet(id) {
-  document.getElementById(id).classList.add('open');
-}
-
-function closeSheet(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-// Close sheets by tapping overlay
-document.querySelectorAll('.sheet-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) overlay.classList.remove('open');
-  });
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 
-let toastTimer;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
-}
-
-function escHtml(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ==================== START ====================
-init();
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+loadLocal();
+// If no pin set, show setup after pin screen interaction
+// Otherwise show pin screen (already visible)
 </script>
-<script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
-<script src="https://accounts.google.com/gsi/client" onload="gsiLoaded()" async defer></script>
 </body>
 </html>
