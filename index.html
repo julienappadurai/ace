@@ -1510,8 +1510,9 @@ function startDriveAuth() {
 }
 
 function launchOAuthPopup(clientId) {
+  const redirectUri = 'https://julienappadurai.github.io/ace';
   const scope = 'https://www.googleapis.com/auth/drive.file';
-  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&response_type=token&scope=${encodeURIComponent(scope)}&prompt=consent`;
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scope)}&prompt=consent`;
 
   const popup = window.open(url, 'driveAuth', 'width=500,height=600,left=100,top=100');
 
