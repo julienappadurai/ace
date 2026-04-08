@@ -955,7 +955,8 @@ function init() {
   }
 
   const hasSeenOnboard = localStorage.getItem('ace_onboarded');
-  if (hasSeenOnboard) {
+  const hasStoredToken = !!localStorage.getItem('ace_gtoken');
+  if (hasSeenOnboard || hasStoredToken) {
     showApp();
     // try silent token refresh
     silentAuth();
