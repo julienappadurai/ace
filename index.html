@@ -87,6 +87,11 @@
     padding: 32px 24px;
     text-align: center;
     gap: 0;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    max-width: var(--max-w);
+    margin: 0 auto;
   }
   #screen-onboarding.active { display: flex; }
 
@@ -983,9 +988,13 @@ function saveLocal() {
 
 // ==================== NAVIGATION ====================
 function showOnboarding() {
-  document.getElementById('screen-onboarding').classList.add('active');
+  // Hide all app screens
+  ['stats','rivals','coach','settings','detail'].forEach(t => {
+    document.getElementById('screen-' + t).classList.remove('active');
+  });
   document.getElementById('tab-bar').classList.remove('visible');
   document.getElementById('fab').classList.remove('visible');
+  document.getElementById('screen-onboarding').classList.add('active');
 }
 
 function showApp() {
