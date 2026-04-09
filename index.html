@@ -1339,7 +1339,7 @@ async function sendCoachMessage() {
     removeTyping(typing);
     const msg = e.message?.includes('401') ? 'Invalid API key — please check your Gemini key.' :
                 e.message?.includes('429') ? 'Too many requests — please wait a moment and try again.' :
-                'Could not reach Ace. Check your connection and try again.';
+                'Error: ' + (e.message || 'Unknown error');
     appendCoachMsg('ace', msg, new Date().toISOString());
   }
   btn.disabled = false;
