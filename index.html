@@ -732,12 +732,9 @@ document.getElementById('pin-keypad').addEventListener('click', e => {
   if (pinBuffer.length === 4) setTimeout(checkPin, 100);
 });
 function checkPin() {
-  loadLocal();
   if (!D.settings.pin) {
-    // No pin set yet — go to setup
     document.getElementById('pin-screen').style.display = 'none';
-    const ss = document.getElementById('setup-screen');
-    ss.style.display = 'flex';
+    document.getElementById('setup-screen').style.display = 'flex';
     return;
   }
   if (pinBuffer === D.settings.pin) {
@@ -747,7 +744,7 @@ function checkPin() {
     updatePinDots(true);
     document.getElementById('pin-error').textContent = 'Incorrect PIN';
     pinBuffer = '';
-    setTimeout(() => updatePinDots(false), 600);
+    setTimeout(() => updatePinDots(false), 800);
   }
 }
 
@@ -1450,8 +1447,12 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
 // INIT
 // ═══════════════════════════════════════════════
 loadLocal();
-// If no pin set, show setup after pin screen interaction
-// Otherwise show pin screen (already visible)
+// On first launch (no PIN stored), skip PIN screen and go straight to setup
+if (!D.settings.pin) {
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+}
+// Otherwise PIN screen is already visible — user enters their PIN
 </script>
 </body>
 </html>
