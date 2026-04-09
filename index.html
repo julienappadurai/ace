@@ -519,7 +519,20 @@
       <div class="setup-label">Set a 4-digit PIN</div>
       <input class="setup-input" id="setup-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
     </div>
+    <div>
+      <div class="setup-label">Gemini API Key <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(for Ace Coach)</span></div>
+      <input class="setup-input" id="setup-gemini-key" type="password" placeholder="AIza...">
+      <div style="margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);line-height:1.7;">
+        <div style="color:var(--green);font-weight:600;margin-bottom:6px;">How to get your free API key:</div>
+        <div>1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--green);text-decoration:underline;">aistudio.google.com/apikey</a></div>
+        <div>2. Sign in with your Google account</div>
+        <div>3. Click <strong style="color:var(--text)">"Create API key"</strong></div>
+        <div>4. Copy and paste it above</div>
+        <div style="margin-top:8px;color:var(--text3);">It's free — no credit card needed. Your key is stored only on your device.</div>
+      </div>
+    </div>
     <button class="btn-primary" onclick="completeSetup()">Get Started →</button>
+    <div style="text-align:center;font-size:12px;color:var(--text3);">You can add your API key later in settings</div>
   </div>
 </div>
 
@@ -591,6 +604,20 @@
 
     <!-- COACH -->
     <div class="tab" id="tab-coach">
+      <!-- No API key warning -->
+      <div id="coach-no-key" style="display:none;margin-bottom:16px;background:var(--yellow-dim);border:1px solid var(--yellow);border-radius:var(--radius);padding:16px;">
+        <div style="color:var(--yellow);font-weight:600;margin-bottom:6px;">⚠️ Gemini API key not set</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px;">
+          To use Ace Coach you need a free Gemini API key.<br>
+          1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--green);">aistudio.google.com/apikey</a><br>
+          2. Sign in with Google → click <strong style="color:var(--text)">"Create API key"</strong><br>
+          3. Paste it below and save
+        </div>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" id="inline-gemini-key" type="password" placeholder="Paste your API key here" style="flex:1;">
+          <button class="btn-primary" onclick="saveInlineGeminiKey()" style="white-space:nowrap;">Save Key</button>
+        </div>
+      </div>
       <div class="coach-layout">
         <div class="coach-messages" id="coach-messages"></div>
         <div class="coach-input-area">
@@ -598,7 +625,7 @@
             <label class="clip-label" for="clip-input">
               📎 Attach clip
             </label>
-            <input type="file" id="clip-input" accept="video/*" onchange="handleClipSelected(this)">
+            <input type="file" id="clip-input" accept="video/*,image/*" onchange="handleClipSelected(this)">
             <span class="clip-name" id="clip-name"></span>
             <button class="btn-ghost" id="clip-clear" style="display:none;font-size:11px;padding:4px 8px;" onclick="clearClip()">✕ Clear</button>
           </div>
@@ -754,11 +781,13 @@ function checkPin() {
 function completeSetup() {
   const name = document.getElementById('setup-name').value.trim();
   const pin  = document.getElementById('setup-pin').value.trim();
+  const geminiKey = document.getElementById('setup-gemini-key').value.trim();
   if (!name) { showToast('Please enter your name'); return; }
   if (!/^\d{4}$/.test(pin)) { showToast('PIN must be 4 digits'); return; }
   D.settings.name = name;
   D.settings.pin  = pin;
   saveLocal();
+  if (geminiKey) localStorage.setItem('ace_gemini_key', geminiKey);
   document.getElementById('setup-screen').style.display = 'none';
   launchApp();
 }
@@ -905,7 +934,7 @@ function switchTab(name) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'matches') renderMatchList();
   if (name === 'opponents') renderOpponents();
-  if (name === 'coach') scrollCoachToBottom();
+  if (name === 'coach') { checkGeminiKey(); scrollCoachToBottom(); }
 }
 
 // ═══════════════════════════════════════════════
@@ -1308,34 +1337,44 @@ function autoResize(ta) {
   ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
 }
 
+function getGeminiKey() { return localStorage.getItem('ace_gemini_key') || ''; }
+
+function saveInlineGeminiKey() {
+  const key = document.getElementById('inline-gemini-key').value.trim();
+  if (!key) { showToast('Please paste your API key'); return; }
+  localStorage.setItem('ace_gemini_key', key);
+  document.getElementById('coach-no-key').style.display = 'none';
+  showToast('API key saved ✓');
+}
+
+function checkGeminiKey() {
+  const noKey = document.getElementById('coach-no-key');
+  if (!getGeminiKey()) { noKey.style.display = 'block'; }
+  else { noKey.style.display = 'none'; }
+}
+
 async function sendCoachMessage() {
+  if (!getGeminiKey()) { showToast('Please add your Gemini API key first'); return; }
   const ta = document.getElementById('coach-input');
   const text = ta.value.trim();
   const hasClip = !!pendingClipBase64;
   if (!text && !hasClip) return;
   const btn = document.getElementById('coach-send-btn');
   btn.disabled = true;
-  const userMsg = text || (hasClip ? '(Video clip attached)' : '');
+  const userMsg = text || '(Media attached)';
   const ts = new Date().toISOString();
-  // Show user message
   appendCoachMsg('user', userMsg + (hasClip ? '\n📎 ' + (pendingClipFile?.name||'clip') : ''), ts);
-  // Save to D.coach
-  if (!D.coach.messages.length) {
-    // first real message
-  }
-  D.coach.messages.push({ role: 'user', content: userMsg + (hasClip ? '\n[video clip: '+pendingClipFile?.name+']' : ''), timestamp: ts });
+  D.coach.messages.push({ role: 'user', content: userMsg + (hasClip ? '\n[media: '+pendingClipFile?.name+']' : ''), timestamp: ts });
   ta.value = ''; ta.style.height = 'auto';
   const clipFile = pendingClipFile;
   const clipB64 = pendingClipBase64;
+  const clipMime = clipFile?.type || 'image/jpeg';
   clearClip();
-  // Show typing
   const typing = showTyping();
-  // Build history for API
   const stats = computeStats();
   const systemPrompt = buildCoachSystem(stats);
-  const messages = buildCoachMessages(userMsg, clipB64, clipFile);
   try {
-    const reply = await callAnthropicCoach(systemPrompt, messages);
+    const reply = await callGeminiCoach(systemPrompt, userMsg, clipB64, clipMime);
     removeTyping(typing);
     const replyTs = new Date().toISOString();
     appendCoachMsg('ace', reply, replyTs);
@@ -1343,7 +1382,10 @@ async function sendCoachMessage() {
     saveLocal(); saveDrive();
   } catch(e) {
     removeTyping(typing);
-    appendCoachMsg('ace', 'Sorry, I had trouble connecting. Please check your network and try again.', new Date().toISOString());
+    const msg = e.message?.includes('401') ? 'Invalid API key — please check your Gemini key.' :
+                e.message?.includes('429') ? 'Too many requests — please wait a moment and try again.' :
+                'Could not reach Ace. Check your connection and try again.';
+    appendCoachMsg('ace', msg, new Date().toISOString());
   }
   btn.disabled = false;
 }
@@ -1368,7 +1410,7 @@ ${recentMatches || 'None yet'}
 
 Your role:
 - Give practical, actionable coaching advice
-- Analyse video clips when provided and give specific feedback on technique, positioning, footwork
+- When images or video frames are shared, give specific feedback on technique, positioning, footwork, racket angle etc.
 - Be encouraging but honest
 - Remember the player's history across this conversation
 - Ask clarifying questions when needed
@@ -1377,42 +1419,36 @@ Your role:
 Respond in plain text, no markdown formatting.`;
 }
 
-function buildCoachMessages(text, clipB64, clipFile) {
-  // Build from history + new message
-  const history = D.coach.messages.slice(0, -1); // exclude the one we just pushed
-  const msgs = [];
-  history.forEach(m => {
-    msgs.push({ role: m.role === 'ace' ? 'assistant' : 'user', content: m.content });
-  });
-  // New user message
-  if (clipB64 && clipFile) {
-    msgs.push({
-      role: 'user',
-      content: [
-        { type: 'text', text: text || 'Please analyse this tennis clip and give me feedback.' },
-        { type: 'image', source: { type: 'base64', media_type: clipFile.type.startsWith('video') ? 'image/jpeg' : clipFile.type, data: clipB64 } }
-      ]
-    });
-  } else {
-    msgs.push({ role: 'user', content: text });
+async function callGeminiCoach(systemPrompt, userText, clipB64, clipMime) {
+  const key = getGeminiKey();
+  // Build conversation history for Gemini
+  const history = D.coach.messages.slice(0, -1).map(m => ({
+    role: m.role === 'ace' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+  // New user message parts
+  const parts = [];
+  if (userText) parts.push({ text: userText });
+  if (clipB64) {
+    // Gemini accepts images; for video we send the first frame as image
+    const mime = clipMime.startsWith('video') ? 'image/jpeg' : clipMime;
+    parts.push({ inlineData: { mimeType: mime, data: clipB64 } });
   }
-  return msgs;
-}
-
-async function callAnthropicCoach(system, messages) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system,
-      messages
-    })
-  });
-  if (!res.ok) throw new Error('API error ' + res.status);
+  const body = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [...history, { role: 'user', parts }],
+    generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+  };
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({}));
+    throw new Error(String(res.status) + ' ' + (err?.error?.message || ''));
+  }
   const data = await res.json();
-  return data.content?.map(c => c.text || '').join('') || 'No response';
+  return data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('') || 'No response from Ace.';
 }
 
 function showTyping() {
