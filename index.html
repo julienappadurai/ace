@@ -519,20 +519,8 @@
       <div class="setup-label">Set a 4-digit PIN</div>
       <input class="setup-input" id="setup-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
     </div>
-    <div>
-      <div class="setup-label">Gemini API Key <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(for Ace Coach)</span></div>
-      <input class="setup-input" id="setup-gemini-key" type="password" placeholder="AIza...">
-      <div style="margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);line-height:1.7;">
-        <div style="color:var(--green);font-weight:600;margin-bottom:6px;">How to get your free API key:</div>
-        <div>1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--green);text-decoration:underline;">aistudio.google.com/apikey</a></div>
-        <div>2. Sign in with your Google account</div>
-        <div>3. Click <strong style="color:var(--text)">"Create API key"</strong></div>
-        <div>4. Copy and paste it above</div>
-        <div style="margin-top:8px;color:var(--text3);">It's free — no credit card needed. Your key is stored only on your device.</div>
-      </div>
-    </div>
     <button class="btn-primary" onclick="completeSetup()">Get Started →</button>
-    <div style="text-align:center;font-size:12px;color:var(--text3);">You can add your API key later in settings</div>
+    <div style="text-align:center;font-size:12px;color:var(--text3);">Ace Coach is ready to use — no setup needed</div>
   </div>
 </div>
 
@@ -604,20 +592,6 @@
 
     <!-- COACH -->
     <div class="tab" id="tab-coach">
-      <!-- No API key warning -->
-      <div id="coach-no-key" style="display:none;margin-bottom:16px;background:var(--yellow-dim);border:1px solid var(--yellow);border-radius:var(--radius);padding:16px;">
-        <div style="color:var(--yellow);font-weight:600;margin-bottom:6px;">⚠️ Gemini API key not set</div>
-        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px;">
-          To use Ace Coach you need a free Gemini API key.<br>
-          1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--green);">aistudio.google.com/apikey</a><br>
-          2. Sign in with Google → click <strong style="color:var(--text)">"Create API key"</strong><br>
-          3. Paste it below and save
-        </div>
-        <div style="display:flex;gap:8px;">
-          <input class="form-input" id="inline-gemini-key" type="password" placeholder="Paste your API key here" style="flex:1;">
-          <button class="btn-primary" onclick="saveInlineGeminiKey()" style="white-space:nowrap;">Save Key</button>
-        </div>
-      </div>
       <div class="coach-layout">
         <div class="coach-messages" id="coach-messages"></div>
         <div class="coach-input-area">
@@ -781,13 +755,11 @@ function checkPin() {
 function completeSetup() {
   const name = document.getElementById('setup-name').value.trim();
   const pin  = document.getElementById('setup-pin').value.trim();
-  const geminiKey = document.getElementById('setup-gemini-key').value.trim();
   if (!name) { showToast('Please enter your name'); return; }
   if (!/^\d{4}$/.test(pin)) { showToast('PIN must be 4 digits'); return; }
   D.settings.name = name;
   D.settings.pin  = pin;
   saveLocal();
-  if (geminiKey) localStorage.setItem('ace_gemini_key', geminiKey);
   document.getElementById('setup-screen').style.display = 'none';
   launchApp();
 }
@@ -934,7 +906,7 @@ function switchTab(name) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'matches') renderMatchList();
   if (name === 'opponents') renderOpponents();
-  if (name === 'coach') { checkGeminiKey(); scrollCoachToBottom(); }
+  if (name === 'coach') { scrollCoachToBottom(); }
 }
 
 // ═══════════════════════════════════════════════
@@ -1337,24 +1309,7 @@ function autoResize(ta) {
   ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
 }
 
-function getGeminiKey() { return localStorage.getItem('ace_gemini_key') || ''; }
-
-function saveInlineGeminiKey() {
-  const key = document.getElementById('inline-gemini-key').value.trim();
-  if (!key) { showToast('Please paste your API key'); return; }
-  localStorage.setItem('ace_gemini_key', key);
-  document.getElementById('coach-no-key').style.display = 'none';
-  showToast('API key saved ✓');
-}
-
-function checkGeminiKey() {
-  const noKey = document.getElementById('coach-no-key');
-  if (!getGeminiKey()) { noKey.style.display = 'block'; }
-  else { noKey.style.display = 'none'; }
-}
-
 async function sendCoachMessage() {
-  if (!getGeminiKey()) { showToast('Please add your Gemini API key first'); return; }
   const ta = document.getElementById('coach-input');
   const text = ta.value.trim();
   const hasClip = !!pendingClipBase64;
@@ -1420,7 +1375,6 @@ Respond in plain text, no markdown formatting.`;
 }
 
 async function callGeminiCoach(systemPrompt, userText, clipB64, clipMime) {
-  const key = getGeminiKey();
   // Build conversation history for Gemini
   const history = D.coach.messages.slice(0, -1).map(m => ({
     role: m.role === 'ace' ? 'model' : 'user',
@@ -1439,10 +1393,12 @@ async function callGeminiCoach(systemPrompt, userText, clipB64, clipMime) {
     contents: [...history, { role: 'user', parts }],
     generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
   };
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-  );
+  const WORKER_URL = 'https://ace-coach.juliena90.workers.dev';
+  const res = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
   if (!res.ok) {
     const err = await res.json().catch(()=>({}));
     throw new Error(String(res.status) + ' ' + (err?.error?.message || ''));
